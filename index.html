@@ -7,7 +7,7 @@
     <style>
         body { background:#000; color:#FFB300; font-family: 'Courier New', monospace; margin:0; padding:10px; overflow-x:hidden; }
         .terminal-header { border-bottom:1px solid #332200; margin-bottom:15px; padding-bottom:10px; }
-        h3 { font-size: 1.1rem; margin:0; letter-spacing:1px; }
+        h3 { font-size: 1.2rem; margin:0; letter-spacing:1px; }
         label { font-size:9px; color:#665500; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:5px; }
         select, button { 
             background:#000; color:#FFB300; border:1px solid #FFB300; 
@@ -15,7 +15,7 @@
             font-family:inherit; font-size: 16px; outline:none;
             border-radius: 0; -webkit-appearance: none;
         }
-        button { font-weight:bold; text-transform:uppercase; cursor:pointer; background:#111; }
+        button { font-weight:bold; text-transform:uppercase; cursor:pointer; background:#111; transition: 0.2s; }
         button:hover { background:#FFB300; color:#000; }
         .result-card { border:1px solid #332200; border-left:4px solid #FFB300; padding:12px; margin-bottom:10px; background:#050505; }
         .mat-breakdown { color: #888; font-size: 0.85rem; margin-top: 10px; border-top: 1px solid #221100; padding-top: 8px; }
@@ -23,11 +23,12 @@
         .mat-name { color: #FFB300; text-transform: uppercase; font-weight: bold; }
         .mat-percent { color: #00FF00; font-weight: bold; }
         #status { font-size:10px; color:#00FF00; margin-bottom:10px; }
+        @media (max-width: 600px) { h3 { font-size: 1rem; } select, button { padding: 12px; font-size: 14px; } }
     </style>
 </head>
 <body>
     <div class="terminal-header">
-        <h3>> SECTOR_ANALYSIS_v20.7</h3>
+        <h3>> SECTOR_ANALYSIS_v20.5</h3>
         <p id="status">[LINK: ESTABLISHING...]</p>
     </div>
 
@@ -53,15 +54,22 @@
             const scanBtn = document.getElementById('scan-btn');
             const DATA_URL = 'https://quattrobaje3na-png.github.io/sc-mining-tool/OreLocations.json';
 
+            // Layman Name Cleanup Function
             function cleanName(raw) {
-                return raw.replace(/(STA|PYR|NYX)_(MOON|PLANET|LAGRANGE|BELT|ZONE|STATION)_/g, '')
+                return raw.replace(/STA_MOON_/g, '')
+                          .replace(/STA_PLANET_/g, '')
+                          .replace(/PYR_PLANET_/g, '')
+                          .replace(/PYR_MOON_/g, '')
+                          .replace(/NYX_MOON_/g, '')
+                          .replace(/STA_LAGRANGE_/g, '')
+                          .replace(/PYR_LAGRANGE_/g, '')
                           .replace(/_/g, ' ')
                           .trim();
             }
 
             fetch(DATA_URL).then(res => res.json()).then(data => {
                 oreData = data;
-                statusMsg.innerText = "[LINK: ONLINE // DATA_STREAM_STABLE]";
+                statusMsg.innerText = "[LINK: ONLINE // ENCRYPTION_STABLE]";
             }).catch(e => { statusMsg.innerText = "[LINK: ERROR]"; });
 
             scanBtn.onclick = function() {
@@ -73,22 +81,11 @@
 
                 const matches = [];
                 for (let loc in oreData) {
-                    const locUpper = loc.toUpperCase();
-                    
-                    // FILTER: Kill any ID starting with "XX-" pattern (2 letters/nums + dash)
-                    // But whitelist Pyro specific points (RAB/RMB)
-                    const isTwoCharDash = /^[A-Z0-9]{2}-/.test(locUpper);
-                    const isPyroWhitelist = locUpper.includes('RAB-') || locUpper.includes('RMB-') || locUpper.includes('AKIRO') || locUpper.includes('BLOOM');
+                    // SECTOR FILTER (Protect Akiro/Bloom)
+                    if (loc.toLowerCase().includes("sector") && !loc.toLowerCase().includes("bloom") && !loc.toLowerCase().includes("akiro")) continue;
 
-                    if (isTwoCharDash && !isPyroWhitelist) continue;
-
-                    // GENERAL STAGING FILTER
-                    const isNamed = locUpper.includes('MOON') || locUpper.includes('LAGRANGE') || locUpper.includes('HALO') || locUpper.includes('BELT') || locUpper.includes('ZONE');
-                    if (!isNamed && !isPyroWhitelist) continue;
-
-                    const isPyro = locUpper.includes('PYR') || isPyroWhitelist;
-                    const isNyx = locUpper.includes('NYX') || locUpper.includes('GLACIUM');
-                    
+                    const isPyro = loc.includes('PYR') || loc.includes('RAB') || loc.includes('BLOOM') || loc.includes('AKIRO');
+                    const isNyx = loc.includes('GLACIUM') || loc.includes('NYX');
                     if (system === "PYRO" && !isPyro) continue;
                     if (system === "NYX" && !isNyx) continue;
                     if (system === "STANTON" && (isPyro || isNyx)) continue;
@@ -112,7 +109,7 @@
                     const div = document.createElement('div');
                     div.className = "result-card";
                     let breakdown = m.ores.map(o => `<div class="mat-row"><span class="mat-name">${o.name}</span><span class="mat-percent">${o.rate}%</span></div>`).join('');
-                    div.innerHTML = `<strong>${m.name}</strong><div class="mat-breakdown">${breakdown}</div>`;
+                    div.innerHTML = `<strong style="text-transform:uppercase;">${m.name}</strong><div class="mat-breakdown">${breakdown}</div>`;
                     out.appendChild(div);
                 });
             };
