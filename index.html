@@ -21,7 +21,7 @@
 </head>
 <body>
     <div class="header">
-        <h3>> INTEL_v29.1</h3>
+        <h3>> INTEL_v29.2</h3>
         <p id="status">ESTABLISHING DATA LINK...</p>
     </div>
 
@@ -33,8 +33,29 @@
     </select>
 
     <label>TARGET_RESOURCES</label>
-    <select id="ore1"><option value="">- SELECT MATERIAL -</option><option value="Quantanium">QUANTANIUM</option><option value="Laranite">LARANITE</option><option value="Bexalite">BEXALITE</option><option value="Taranite">TARANITE</option><option value="Agricium">AGRICIUM</option><option value="Hephaestanite">HEPHAESTANITE</option></select>
-    <select id="ore2"><option value="">- SELECT MATERIAL -</option><option value="Quantanium">QUANTANIUM</option><option value="Laranite">LARANITE</option><option value="Bexalite">BEXALITE</option><option value="Taranite">TARANITE</option><option value="Agricium">AGRICIUM</option><option value="Hephaestanite">HEPHAESTANITE</option></select>
+    <select id="ore1">
+        <option value="">- SELECT MATERIAL -</option>
+        <option value="Quantanium">QUANTANIUM</option>
+        <option value="Laranite">LARANITE</option>
+        <option value="Bexalite">BEXALITE</option>
+        <option value="Taranite">TARANITE</option>
+        <option value="Agricium">AGRICIUM</option>
+        <option value="Hephaestanite">HEPHAESTANITE</option>
+        <option value="Borase">BORASE</option>
+        <option value="Gold">GOLD</option>
+    </select>
+
+    <select id="ore2">
+        <option value="">- SELECT MATERIAL -</option>
+        <option value="Quantanium">QUANTANIUM</option>
+        <option value="Laranite">LARANITE</option>
+        <option value="Bexalite">BEXALITE</option>
+        <option value="Taranite">TARANITE</option>
+        <option value="Agricium">AGRICIUM</option>
+        <option value="Hephaestanite">HEPHAESTANITE</option>
+        <option value="Borase">BORASE</option>
+        <option value="Gold">GOLD</option>
+    </select>
 
     <button onclick="scan()">Execute Scan</button>
     <div id="results"></div>
@@ -43,9 +64,9 @@
         let oreData, sysGroups, refMapping;
         const statusText = document.getElementById('status');
         
+        // Ensure your GitHub branch is named 'main'
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
 
-        // Sync all three data files
         Promise.all([
             fetch(BASE_URL + 'OreLocations.json').then(r => r.json()),
             fetch(BASE_URL + 'system_sorting.json').then(r => r.json()),
@@ -54,8 +75,9 @@
             [oreData, sysGroups, refMapping] = responses;
             statusText.innerText = "READY: MULTI-STREAM SYNC COMPLETE";
         }).catch(err => {
-            statusText.innerText = "SYNC_ERROR: CHECK REPOSITORY PATHS";
+            statusText.innerText = "SYNC_ERROR: ENSURE FILENAMES ARE .json ON GITHUB";
             statusText.style.color = "red";
+            console.error(err);
         });
 
         function scan() {
@@ -70,7 +92,6 @@
             const activeGroup = sysGroups.star_system_groups[system] || [];
 
             for (let loc in oreData) {
-                // Filter by system group
                 if (!activeGroup.includes(loc)) continue;
 
                 let foundOres = [];
@@ -85,7 +106,6 @@
                 });
 
                 if (foundOres.length > 0) {
-                    // Use player-facing name if it exists in reference.json
                     const friendlyName = refMapping.location_mapping[loc] || loc.replace(/_/g, ' ');
                     matches.push({ name: friendlyName, ores: foundOres, sortVal: maxProb });
                 }
