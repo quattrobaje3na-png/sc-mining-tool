@@ -27,7 +27,7 @@
 </head>
 <body>
     <div class="terminal-header">
-        <h3>> SECTOR_ANALYSIS_v20.7</h3>
+        <h3>> SECTOR_ANALYSIS_v20.8</h3>
         <p id="status">[LINK: ESTABLISHING...]</p>
     </div>
 
@@ -53,8 +53,10 @@
             const scanBtn = document.getElementById('scan-btn');
             const DATA_URL = 'https://quattrobaje3na-png.github.io/sc-mining-tool/OreLocations.json';
 
+            // Fixed Cleanup Function: Only strips if followed by underscore
             function cleanName(raw) {
-                return raw.replace(/(STA|PYR|NYX)_(MOON|PLANET|LAGRANGE|BELT|ZONE|STATION)_/g, '')
+                return raw.replace(/^(STA|PYR|NYX)_/g, '')
+                          .replace(/^(MOON|PLANET|LAGRANGE|BELT|ZONE|STATION)_/g, '')
                           .replace(/_/g, ' ')
                           .trim();
             }
@@ -75,15 +77,12 @@
                 for (let loc in oreData) {
                     const locUpper = loc.toUpperCase();
                     
-                    // FILTER: Kill any ID starting with "XX-" pattern (2 letters/nums + dash)
-                    // But whitelist Pyro specific points (RAB/RMB)
                     const isTwoCharDash = /^[A-Z0-9]{2}-/.test(locUpper);
                     const isPyroWhitelist = locUpper.includes('RAB-') || locUpper.includes('RMB-') || locUpper.includes('AKIRO') || locUpper.includes('BLOOM');
 
                     if (isTwoCharDash && !isPyroWhitelist) continue;
 
-                    // GENERAL STAGING FILTER
-                    const isNamed = locUpper.includes('MOON') || locUpper.includes('LAGRANGE') || locUpper.includes('HALO') || locUpper.includes('BELT') || locUpper.includes('ZONE');
+                    const isNamed = locUpper.includes('MOON') || locUpper.includes('LAGRANGE') || locUpper.includes('HALO') || locUpper.includes('BELT') || locUpper.includes('ZONE') || locUpper.includes('PLANET');
                     if (!isNamed && !isPyroWhitelist) continue;
 
                     const isPyro = locUpper.includes('PYR') || isPyroWhitelist;
