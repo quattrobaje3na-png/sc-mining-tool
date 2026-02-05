@@ -27,8 +27,8 @@
 </head>
 <body>
     <div class="terminal-header">
-        <h3>> SECTOR_ANALYSIS_v22.0</h3>
-        <p id="status">[LINK: ONLINE // SYSTEM_SORT_ACTIVE]</p>
+        <h3>> SECTOR_ANALYSIS_v22.1</h3>
+        <p id="status">[LINK: ONLINE // RECALIBRATING_SENSORS]</p>
     </div>
 
     <label>Region_Selection</label>
@@ -43,7 +43,7 @@
     <select class="mat-select"><option value="">- SELECT_ORE_02 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
     <select class="mat-select"><option value="">- SELECT_ORE_03 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
 
-    <button id="scan-btn">Execute Filtered Deep Scan</button>
+    <button id="scan-btn">Execute Broad Scan</button>
     <div id="results"></div>
 
     <script>
@@ -62,7 +62,7 @@
 
             fetch(DATA_URL).then(res => res.json()).then(data => {
                 oreData = data;
-                statusMsg.innerText = "[LINK: ONLINE // FILTER_ACTIVE]";
+                statusMsg.innerText = "[LINK: ONLINE // MANIFEST_SECURED]";
             }).catch(e => { statusMsg.innerText = "[LINK: ERROR]"; });
 
             scanBtn.onclick = function() {
@@ -77,21 +77,22 @@
                 for (let loc in oreData) {
                     const locU = loc.toUpperCase();
                     
-                    // 1. SYSTEM SORTING
+                    // 1. FUZZY SYSTEM SORTING
                     let locSystem = "";
-                    if (locU.startsWith("STA_")) locSystem = "STANTON";
-                    else if (locU.startsWith("PYR_") || locU.includes("RAB-") || locU.includes("RMB-")) locSystem = "PYRO";
-                    else if (locU.startsWith("NYX_")) locSystem = "NYX";
+                    if (locU.includes("STA_") || locU.includes("STANTON")) locSystem = "STANTON";
+                    else if (locU.includes("PYR_") || locU.includes("PYRO") || locU.includes("RAB-") || locU.includes("RMB-")) locSystem = "PYRO";
+                    else if (locU.includes("NYX_") || locU.includes("GLACIUM")) locSystem = "NYX";
 
                     if (locSystem !== system) continue;
 
-                    // 2. WHITELIST FILTERING
-                    const isMoon = locU.includes("MOON_");
-                    const isPlanet = locU.includes("PLANET_");
-                    const isLagrange = locU.includes("LAGRANGE_");
-                    const isRABRMB = locU.includes("RAB-") || locU.includes("RMB-");
+                    // 2. BROAD WHITELIST (Fuzzy keywords)
+                    const isNamed = locU.includes("MOON") || locU.includes("PLANET") || 
+                                    locU.includes("LAGRANGE") || locU.includes("RAB") || 
+                                    locU.includes("RMB") || locU.includes("HALO") || 
+                                    locU.includes("BELT");
 
-                    if (!isMoon && !isPlanet && !isLagrange && !isRABRMB) continue;
+                    // Kill internal codes/sectors unless they hit the fuzzy list
+                    if (!isNamed && /^[A-Z0-9]{2}-/.test(locU)) continue;
 
                     let locationOres = [];
                     let highProb = 0;
@@ -112,13 +113,8 @@
                 matches.sort((a, b) => b.sortVal - a.sortVal).forEach(m => {
                     const div = document.createElement('div');
                     div.className = "result-card";
-                    let breakdownHtml = m.ores.map(o => `
-                        <div class="mat-row">
-                            <span class="mat-name">${o.name}</span>
-                            <span class="mat-percent">${o.rate}%</span>
-                        </div>`).join('');
-
-                    div.innerHTML = `<strong>${m.name}</strong><div class="mat-breakdown">${breakdownHtml}</div>`;
+                    let breakdown = m.ores.map(o => `<div class="mat-row"><span class="mat-name">${o.name}</span><span class="mat-percent">${o.rate}%</span></div>`).join('');
+                    div.innerHTML = `<strong>${m.name}</strong><div class="mat-breakdown">${breakdown}</div>`;
                     out.appendChild(div);
                 });
             };
