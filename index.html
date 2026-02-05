@@ -15,10 +15,10 @@
             font-family:inherit; font-size: 16px; outline:none;
             border-radius: 0; -webkit-appearance: none;
         }
-        button { font-weight:bold; text-transform:uppercase; cursor:pointer; background:#111; }
+        button { font-weight:bold; text-transform:uppercase; cursor:pointer; background:#111; transition: 0.2s; }
         button:hover { background:#FFB300; color:#000; }
-        .result-card { border:1px solid #332200; border-left:4px solid #FFB300; padding:12px; margin-bottom:10px; background:#050505; }
-        .mat-breakdown { color: #888; font-size: 0.85rem; margin-top: 10px; border-top: 1px solid #221100; padding-top: 8px; }
+        .result-card { border:1px solid #332200; border-left:4px solid #FFB300; padding:15px; margin-bottom:10px; background:#050505; }
+        .mat-breakdown { color: #888; font-size: 0.9rem; margin-top: 10px; border-top: 1px solid #221100; padding-top: 8px; }
         .mat-row { display: flex; justify-content: space-between; margin-bottom: 5px; padding: 2px 0; border-bottom: 1px solid #111; }
         .mat-name { color: #FFB300; text-transform: uppercase; font-weight: bold; }
         .mat-percent { color: #00FF00; font-weight: bold; }
@@ -27,23 +27,16 @@
 </head>
 <body>
     <div class="terminal-header">
-        <h3>> SECTOR_ANALYSIS_v21.0</h3>
-        <p id="status">[LINK: ONLINE // UNFILTERED_ACCESS]</p>
+        <h3>> SECTOR_ANALYSIS_v21.1</h3>
+        <p id="status">[LINK: ONLINE // TOTAL_MANIFEST_ACCESS]</p>
     </div>
 
-    <label>Region_Selection</label>
-    <select id="sys-select">
-        <option value="STANTON">STANTON_SYSTEM</option>
-        <option value="PYRO">PYRO_SYSTEM</option>
-        <option value="NYX">NYX_SYSTEM</option>
-    </select>
-
-    <label>Resource_Targets</label>
+    <label>Select Target Resources</label>
     <select class="mat-select"><option value="">- SELECT_ORE_01 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
     <select class="mat-select"><option value="">- SELECT_ORE_02 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
     <select class="mat-select"><option value="">- SELECT_ORE_03 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
 
-    <button id="scan-btn">Execute Deep Scan</button>
+    <button id="scan-btn">Execute Global Manifest Search</button>
     <div id="results"></div>
 
     <script>
@@ -53,6 +46,7 @@
             const scanBtn = document.getElementById('scan-btn');
             const DATA_URL = 'https://quattrobaje3na-png.github.io/sc-mining-tool/OreLocations.json';
 
+            // Minimal Cleanup: Just make it readable
             function cleanName(raw) {
                 return raw.replace(/^(STA|PYR|NYX)_/g, '')
                           .replace(/^(MOON|PLANET|LAGRANGE|BELT|ZONE|STATION|MINING_BASE)_/g, '')
@@ -62,30 +56,22 @@
 
             fetch(DATA_URL).then(res => res.json()).then(data => {
                 oreData = data;
-                statusMsg.innerText = "[LINK: ONLINE // RAW_DATA_ACCESSED]";
+                statusMsg.innerText = "[LINK: ONLINE // DATABASE_STABLE]";
             }).catch(e => { statusMsg.innerText = "[LINK: ERROR]"; });
 
             scanBtn.onclick = function() {
                 const out = document.getElementById('results');
-                const system = document.getElementById('sys-select').value;
                 const picks = Array.from(document.querySelectorAll('.mat-select')).map(s => s.value).filter(v => v);
                 out.innerHTML = "";
+                
                 if (picks.length === 0 || !oreData) return;
 
                 const matches = [];
-                for (let loc in oreData) {
-                    const locU = loc.toUpperCase();
-                    
-                    // SYSTEM FILTER (Stanton vs Pyro vs Nyx)
-                    const isPyro = locU.includes('PYR') || locU.includes('RAB-') || locU.includes('RMB-') || locU.includes('AKIRO') || locU.includes('BLOOM') || locU.includes('PATCH');
-                    const isNyx = locU.includes('NYX') || locU.includes('GLACIUM');
-                    
-                    if (system === "PYRO" && !isPyro) continue;
-                    if (system === "NYX" && !isNyx) continue;
-                    if (system === "STANTON" && (isPyro || isNyx)) continue;
 
+                for (let loc in oreData) {
                     let locationOres = [];
                     let highProb = 0;
+
                     picks.forEach(target => {
                         if (oreData[loc].ores && oreData[loc].ores[target]) {
                             const val = oreData[loc].ores[target].prob;
@@ -94,17 +80,27 @@
                         }
                     });
 
-                    // If it has ANY of the ores we want, show it. NO OTHER FILTERS.
+                    // ZERO FILTERS: If it has the ore, show it.
                     if (locationOres.length > 0) {
                         matches.push({ name: cleanName(loc), ores: locationOres, sortVal: highProb });
                     }
                 }
 
+                // Sort by highest probability found
                 matches.sort((a, b) => b.sortVal - a.sortVal).forEach(m => {
                     const div = document.createElement('div');
                     div.className = "result-card";
-                    let breakdown = m.ores.map(o => `<div class="mat-row"><span class="mat-name">${o.name}</span><span class="mat-percent">${o.rate}%</span></div>`).join('');
-                    div.innerHTML = `<strong>${m.name}</strong><div class="mat-breakdown">${breakdown}</div>`;
+                    let breakdownHtml = m.ores.map(o => `
+                        <div class="mat-row">
+                            <span class="mat-name">${o.name}</span>
+                            <span class="mat-percent">${o.rate}%</span>
+                        </div>
+                    `).join('');
+
+                    div.innerHTML = `
+                        <strong style="text-transform:uppercase;">${m.name}</strong>
+                        <div class="mat-breakdown">${breakdownHtml}</div>
+                    `;
                     out.appendChild(div);
                 });
             };
