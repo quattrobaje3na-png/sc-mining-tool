@@ -15,10 +15,10 @@
             font-family:inherit; font-size: 16px; outline:none;
             border-radius: 0; -webkit-appearance: none;
         }
-        button { font-weight:bold; text-transform:uppercase; cursor:pointer; background:#111; transition: 0.2s; }
+        button { font-weight:bold; text-transform:uppercase; cursor:pointer; background:#111; }
         button:hover { background:#FFB300; color:#000; }
-        .result-card { border:1px solid #332200; border-left:4px solid #FFB300; padding:15px; margin-bottom:10px; background:#050505; }
-        .mat-breakdown { color: #888; font-size: 0.9rem; margin-top: 10px; border-top: 1px solid #221100; padding-top: 8px; }
+        .result-card { border:1px solid #332200; border-left:4px solid #FFB300; padding:12px; margin-bottom:10px; background:#050505; }
+        .mat-breakdown { color: #888; font-size: 0.85rem; margin-top: 10px; border-top: 1px solid #221100; padding-top: 8px; }
         .mat-row { display: flex; justify-content: space-between; margin-bottom: 5px; padding: 2px 0; border-bottom: 1px solid #111; }
         .mat-name { color: #FFB300; text-transform: uppercase; font-weight: bold; }
         .mat-percent { color: #00FF00; font-weight: bold; }
@@ -27,23 +27,22 @@
 </head>
 <body>
     <div class="terminal-header">
-        <h3>> SECTOR_ANALYSIS_v22.1</h3>
-        <p id="status">[LINK: ONLINE // RECALIBRATING_SENSORS]</p>
+        <h3>> SECTOR_ANALYSIS_v22.2</h3>
+        <p id="status">[LINK: ESTABLISHING...]</p>
     </div>
 
-    <label>Region_Selection</label>
+    <label>System_Selection</label>
     <select id="sys-select">
-        <option value="STANTON">STANTON_SYSTEM</option>
-        <option value="PYRO">PYRO_SYSTEM</option>
-        <option value="NYX">NYX_SYSTEM</option>
+        <option value="STANTON">STANTON</option>
+        <option value="PYRO">PYRO</option>
+        <option value="NYX">NYX</option>
     </select>
 
     <label>Resource_Targets</label>
-    <select class="mat-select"><option value="">- SELECT_ORE_01 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
-    <select class="mat-select"><option value="">- SELECT_ORE_02 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
-    <select class="mat-select"><option value="">- SELECT_ORE_03 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
+    <select class="mat-select"><option value="">- SELECT_ORE_01 -</option><option value="QUANTANIUM">QUANTANIUM</option><option value="LARANITE">LARANITE</option><option value="BEXALITE">BEXALITE</option><option value="TARANITE">TARANITE</option><option value="AGRICIUM">AGRICIUM</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="BORASE">BORASE</option><option value="GOLD">GOLD</option></select>
+    <select class="mat-select"><option value="">- SELECT_ORE_02 -</option><option value="QUANTANIUM">QUANTANIUM</option><option value="LARANITE">LARANITE</option><option value="BEXALITE">BEXALITE</option><option value="TARANITE">TARANITE</option><option value="AGRICIUM">AGRICIUM</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="BORASE">BORASE</option><option value="GOLD">GOLD</option></select>
 
-    <button id="scan-btn">Execute Broad Scan</button>
+    <button id="scan-btn">Initiate Deep Scan</button>
     <div id="results"></div>
 
     <script>
@@ -60,24 +59,38 @@
                           .trim();
             }
 
-            fetch(DATA_URL).then(res => res.json()).then(data => {
-                oreData = data;
-                statusMsg.innerText = "[LINK: ONLINE // MANIFEST_SECURED]";
-            }).catch(e => { statusMsg.innerText = "[LINK: ERROR]"; });
+            fetch(DATA_URL)
+                .then(res => res.json())
+                .then(data => {
+                    oreData = data;
+                    statusMsg.innerText = "[LINK: ONLINE // ENCRYPTION_STABLE]";
+                })
+                .catch(e => { 
+                    statusMsg.innerText = "[LINK: ERROR // CHECK_JSON_FILE]";
+                    statusMsg.style.color = "#FF0000";
+                });
 
             scanBtn.onclick = function() {
                 const out = document.getElementById('results');
                 const system = document.getElementById('sys-select').value;
-                const picks = Array.from(document.querySelectorAll('.mat-select')).map(s => s.value).filter(v => v);
+                const rawPicks = Array.from(document.querySelectorAll('.mat-select')).map(s => s.value).filter(v => v);
+                
                 out.innerHTML = "";
-                if (picks.length === 0 || !oreData) return;
+                if (!oreData) {
+                    alert("Data not loaded yet. Check top status.");
+                    return;
+                }
+                if (rawPicks.length === 0) return;
 
                 const matches = [];
+
+                // Standardize picks to help match JSON regardless of case
+                const picks = rawPicks.map(p => p.toUpperCase());
 
                 for (let loc in oreData) {
                     const locU = loc.toUpperCase();
                     
-                    // 1. FUZZY SYSTEM SORTING
+                    // SYSTEM FILTERING
                     let locSystem = "";
                     if (locU.includes("STA_") || locU.includes("STANTON")) locSystem = "STANTON";
                     else if (locU.includes("PYR_") || locU.includes("PYRO") || locU.includes("RAB-") || locU.includes("RMB-")) locSystem = "PYRO";
@@ -85,28 +98,32 @@
 
                     if (locSystem !== system) continue;
 
-                    // 2. BROAD WHITELIST (Fuzzy keywords)
+                    // LOCATION FILTERING (Whitelisting MOON, PLANET, LAGRANGE, etc.)
                     const isNamed = locU.includes("MOON") || locU.includes("PLANET") || 
                                     locU.includes("LAGRANGE") || locU.includes("RAB") || 
                                     locU.includes("RMB") || locU.includes("HALO") || 
-                                    locU.includes("BELT");
+                                    locU.includes("BELT") || locU.includes("BASE");
 
-                    // Kill internal codes/sectors unless they hit the fuzzy list
-                    if (!isNamed && /^[A-Z0-9]{2}-/.test(locU)) continue;
+                    if (!isNamed) continue;
 
-                    let locationOres = [];
-                    let highProb = 0;
+                    let foundOres = [];
+                    let topProb = 0;
 
-                    picks.forEach(target => {
-                        if (oreData[loc].ores && oreData[loc].ores[target]) {
-                            const val = oreData[loc].ores[target].prob;
-                            if (val > highProb) highProb = val;
-                            locationOres.push({ name: target, rate: (val * 100).toFixed(1) });
+                    // Match logic
+                    if (oreData[loc].ores) {
+                        const jsonOres = oreData[loc].ores;
+                        // Check every ore in the JSON for this location
+                        for (let key in jsonOres) {
+                            if (picks.includes(key.toUpperCase())) {
+                                const prob = jsonOres[key].prob || 0;
+                                foundOres.push({ name: key.toUpperCase(), rate: (prob * 100).toFixed(1) });
+                                if (prob > topProb) topProb = prob;
+                            }
                         }
-                    });
+                    }
 
-                    if (locationOres.length > 0) {
-                        matches.push({ name: cleanName(loc), ores: locationOres, sortVal: highProb });
+                    if (foundOres.length > 0) {
+                        matches.push({ name: cleanName(loc), ores: foundOres, sortVal: topProb });
                     }
                 }
 
@@ -114,9 +131,13 @@
                     const div = document.createElement('div');
                     div.className = "result-card";
                     let breakdown = m.ores.map(o => `<div class="mat-row"><span class="mat-name">${o.name}</span><span class="mat-percent">${o.rate}%</span></div>`).join('');
-                    div.innerHTML = `<strong>${m.name}</strong><div class="mat-breakdown">${breakdown}</div>`;
+                    div.innerHTML = `<strong style="text-transform:uppercase;">${m.name}</strong><div class="mat-breakdown">${breakdown}</div>`;
                     out.appendChild(div);
                 });
+
+                if (matches.length === 0) {
+                    out.innerHTML = "<p style='font-size:11px; color:#443300;'>[NO DATA DETECTED IN THIS REGION]</p>";
+                }
             };
         })();
     </script>
