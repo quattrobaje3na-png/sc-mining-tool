@@ -2,89 +2,121 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mining Intel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Citizen Starter Guide - Mining Intel</title>
     <style>
-        body { background:#000; color:#FFB300; font-family: monospace; padding:15px; }
-        .header { border-bottom:1px solid #332200; margin-bottom:20px; padding-bottom:10px; }
+        body { background:#000; color:#FFB300; font-family: 'Courier New', monospace; margin:0; padding:10px; overflow-x:hidden; }
+        .terminal-header { border-bottom:1px solid #332200; margin-bottom:15px; padding-bottom:10px; }
+        h3 { font-size: 1.1rem; margin:0; letter-spacing:1px; }
+        label { font-size:9px; color:#665500; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:5px; }
         select, button { 
-            background:#111; color:#FFB300; border:1px solid #FFB300; 
-            padding:12px; margin-bottom:10px; width:100%; font-size: 16px;
+            background:#000; color:#FFB300; border:1px solid #FFB300; 
+            padding:14px; margin-bottom:12px; width:100%; 
+            font-family:inherit; font-size: 16px; outline:none;
+            border-radius: 0; -webkit-appearance: none;
         }
-        button { font-weight:bold; cursor:pointer; }
-        .card { border:1px solid #332200; border-left:4px solid #FFB300; padding:12px; margin-bottom:10px; background:#050505; }
-        .row { display: flex; justify-content: space-between; font-size: 14px; margin-top:5px; border-top: 1px solid #222; padding-top:5px; }
-        #status { font-size:12px; color:#00FF00; }
+        button { font-weight:bold; text-transform:uppercase; cursor:pointer; background:#111; }
+        button:hover { background:#FFB300; color:#000; }
+        .result-card { border:1px solid #332200; border-left:4px solid #FFB300; padding:12px; margin-bottom:10px; background:#050505; }
+        .mat-breakdown { color: #888; font-size: 0.85rem; margin-top: 10px; border-top: 1px solid #221100; padding-top: 8px; }
+        .mat-row { display: flex; justify-content: space-between; margin-bottom: 5px; padding: 2px 0; border-bottom: 1px solid #111; }
+        .mat-name { color: #FFB300; text-transform: uppercase; font-weight: bold; }
+        .mat-percent { color: #00FF00; font-weight: bold; }
+        #status { font-size:10px; color:#00FF00; margin-bottom:10px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h3>> INTEL_v28.0</h3>
-        <p id="status">INITIALIZING...</p>
+    <div class="terminal-header">
+        <h3>> SECTOR_ANALYSIS_v20.7</h3>
+        <p id="status">[LINK: ESTABLISHING...]</p>
     </div>
 
-    <label>TARGET 1</label>
-    <select id="ore1">
-        <option value="">- SELECT MATERIAL -</option>
-        <option value="Quantanium">QUANTANIUM</option>
-        <option value="Laranite">LARANITE</option>
-        <option value="Bexalite">BEXALITE</option>
-        <option value="Taranite">TARANITE</option>
-        <option value="Agricium">AGRICIUM</option>
-        <option value="Hephaestanite">HEPHAESTANITE</option>
-        <option value="Borase">BORASE</option>
-        <option value="Gold">GOLD</option>
+    <label>Region_Selection</label>
+    <select id="sys-select">
+        <option value="STANTON">STANTON_SYSTEM</option>
+        <option value="PYRO">PYRO_SYSTEM</option>
+        <option value="NYX">NYX_SYSTEM</option>
     </select>
 
-    <label>TARGET 2</label>
-    <select id="ore2">
-        <option value="">- SELECT MATERIAL -</option>
-        <option value="Quantanium">QUANTANIUM</option>
-        <option value="Laranite">LARANITE</option>
-        <option value="Bexalite">BEXALITE</option>
-        <option value="Taranite">TARANITE</option>
-        <option value="Agricium">AGRICIUM</option>
-        <option value="Hephaestanite">HEPHAESTANITE</option>
-        <option value="Borase">BORASE</option>
-        <option value="Gold">GOLD</option>
-    </select>
+    <label>Resource_Targets</label>
+    <select class="mat-select"><option value="">- SELECT_ORE_01 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
+    <select class="mat-select"><option value="">- SELECT_ORE_02 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
+    <select class="mat-select"><option value="">- SELECT_ORE_03 -</option><option value="AGRICIUM">AGRICIUM</option><option value="ALUMINUM">ALUMINUM</option><option value="AMMONIA">AMMONIA</option><option value="BERYL">BERYL</option><option value="BEXALITE">BEXALITE</option><option value="BORASE">BORASE</option><option value="COPPER">COPPER</option><option value="CORUNDUM">CORUNDUM</option><option value="DIAMOND">DIAMOND</option><option value="GOLD">GOLD</option><option value="HEPHAESTANITE">HEPHAESTANITE</option><option value="IRON">IRON</option><option value="LARANITE">LARANITE</option><option value="LINDINIUM">LINDINIUM</option><option value="QUANTANIUM">QUANTANIUM</option><option value="QUARTZ">QUARTZ</option><option value="TARANITE">TARANITE</option><option value="TITANIUM">TITANIUM</option><option value="TUNGSTEN">TUNGSTEN</option></select>
 
-    <button onclick="scan()">EXECUTE SCAN</button>
+    <button id="scan-btn">Execute Deep Scan</button>
     <div id="results"></div>
 
     <script>
-        let rawData = null;
-        const statusText = document.getElementById('status');
+        (function() {
+            let oreData = null;
+            const statusMsg = document.getElementById('status');
+            const scanBtn = document.getElementById('scan-btn');
+            const DATA_URL = 'https://quattrobaje3na-png.github.io/sc-mining-tool/OreLocations.json';
 
-        fetch('https://quattrobaje3na-png.github.io/sc-mining-tool/OreLocations.json')
-            .then(res => res.json())
-            .then(json => {
-                rawData = json;
-                statusText.innerText = "READY: DATABASE CONNECTED";
-            })
-            .catch(err => {
-                statusText.innerText = "ERROR: JSON NOT FOUND";
-                statusText.style.color = "red";
-            });
+            function cleanName(raw) {
+                return raw.replace(/(STA|PYR|NYX)_(MOON|PLANET|LAGRANGE|BELT|ZONE|STATION)_/g, '')
+                          .replace(/_/g, ' ')
+                          .trim();
+            }
 
-        function scan() {
-            const out = document.getElementById('results');
-            const o1 = document.getElementById('ore1').value;
-            const o2 = document.getElementById('ore2').value;
-            const picks = [o1, o2].filter(p => p !== "");
+            fetch(DATA_URL).then(res => res.json()).then(data => {
+                oreData = data;
+                statusMsg.innerText = "[LINK: ONLINE // DATA_STREAM_STABLE]";
+            }).catch(e => { statusMsg.innerText = "[LINK: ERROR]"; });
 
-            out.innerHTML = "";
+            scanBtn.onclick = function() {
+                const out = document.getElementById('results');
+                const system = document.getElementById('sys-select').value;
+                const picks = Array.from(document.querySelectorAll('.mat-select')).map(s => s.value).filter(v => v);
+                out.innerHTML = "";
+                if (picks.length === 0 || !oreData) return;
 
-            if (!rawData) { alert("Data hasn't loaded."); return; }
-            if (picks.length === 0) return;
+                const matches = [];
+                for (let loc in oreData) {
+                    const locUpper = loc.toUpperCase();
+                    
+                    // FILTER: Kill any ID starting with "XX-" pattern (2 letters/nums + dash)
+                    // But whitelist Pyro specific points (RAB/RMB)
+                    const isTwoCharDash = /^[A-Z0-9]{2}-/.test(locUpper);
+                    const isPyroWhitelist = locUpper.includes('RAB-') || locUpper.includes('RMB-') || locUpper.includes('AKIRO') || locUpper.includes('BLOOM');
 
-            const matches = [];
+                    if (isTwoCharDash && !isPyroWhitelist) continue;
 
-            for (let loc in rawData) {
-                let foundOres = [];
-                let maxProb = 0;
+                    // GENERAL STAGING FILTER
+                    const isNamed = locUpper.includes('MOON') || locUpper.includes('LAGRANGE') || locUpper.includes('HALO') || locUpper.includes('BELT') || locUpper.includes('ZONE');
+                    if (!isNamed && !isPyroWhitelist) continue;
 
-                picks.forEach(p => {
-                    if (rawData[loc].ores && rawData[loc].ores[p]) {
-                        let prob = rawData[loc].ores[p].prob || 0;
-                        foundOres.push({ name: p.toUpperCase(), val: (prob * 100).toFixed(1)
+                    const isPyro = locUpper.includes('PYR') || isPyroWhitelist;
+                    const isNyx = locUpper.includes('NYX') || locUpper.includes('GLACIUM');
+                    
+                    if (system === "PYRO" && !isPyro) continue;
+                    if (system === "NYX" && !isNyx) continue;
+                    if (system === "STANTON" && (isPyro || isNyx)) continue;
+
+                    let locationOres = [];
+                    let highProb = 0;
+                    picks.forEach(target => {
+                        if (oreData[loc].ores && oreData[loc].ores[target]) {
+                            const val = oreData[loc].ores[target].prob;
+                            if (val > highProb) highProb = val;
+                            locationOres.push({ name: target, rate: (val * 100).toFixed(1) });
+                        }
+                    });
+
+                    if (locationOres.length > 0) {
+                        matches.push({ name: cleanName(loc), ores: locationOres, sortVal: highProb });
+                    }
+                }
+
+                matches.sort((a, b) => b.sortVal - a.sortVal).forEach(m => {
+                    const div = document.createElement('div');
+                    div.className = "result-card";
+                    let breakdown = m.ores.map(o => `<div class="mat-row"><span class="mat-name">${o.name}</span><span class="mat-percent">${o.rate}%</span></div>`).join('');
+                    div.innerHTML = `<strong>${m.name}</strong><div class="mat-breakdown">${breakdown}</div>`;
+                    out.appendChild(div);
+                });
+            };
+        })();
+    </script>
+</body>
+</html>
