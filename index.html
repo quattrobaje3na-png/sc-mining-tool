@@ -21,7 +21,7 @@
 </head>
 <body>
     <div class="header">
-        <h3>> INTEL_v29.7_FULL_DATABASE</h3>
+        <h3>> INTEL_v29.8_STRICT_REF</h3>
         <p id="status">ESTABLISHING DATA LINK...</p>
     </div>
 
@@ -77,7 +77,7 @@
         <option value="Ammonia">AMMONIA</option>
     </select>
 
-    <button onclick="scan()">Execute Full Scan</button>
+    <button onclick="scan()">Execute Strict Scan</button>
     <div id="results"></div>
 
     <script>
@@ -91,7 +91,7 @@
             fetch(BASE_URL + 'reference.json', {cache: "no-store"}).then(r => r.json())
         ]).then(responses => {
             [oreData, sysGroups, refMapping] = responses;
-            statusText.innerText = "READY: FULL SYNC COMPLETE";
+            statusText.innerText = "READY: STRICT SYNC COMPLETE";
         }).catch(err => {
             statusText.innerText = "SYNC_ERROR";
             statusText.style.color = "red";
@@ -107,16 +107,20 @@
 
             const matches = [];
             const activeGroup = sysGroups.star_system_groups[system] || [];
+            const validLocations = refMapping.location_mapping || {};
 
             for (let loc in oreData) {
+                // RULE 1: Must be in the selected Star System
                 if (!activeGroup.includes(loc)) continue;
+
+                // RULE 2: Must exist in reference.json (Exclude unmapped codes)
+                if (!validLocations[loc]) continue;
 
                 let foundOres = [];
                 let maxProb = 0;
 
                 picks.forEach(p => {
                     const locOres = oreData[loc].ores || {};
-                    // Improved matching logic to handle minor spelling/case variances in JSON keys
                     const matchKey = Object.keys(locOres).find(k => k.toLowerCase() === p.toLowerCase());
                     
                     if (matchKey) {
@@ -127,13 +131,13 @@
                 });
 
                 if (foundOres.length > 0) {
-                    const friendlyName = refMapping.location_mapping[loc] || loc;
+                    const friendlyName = validLocations[loc];
                     matches.push({ name: friendlyName, ores: foundOres, sortVal: maxProb });
                 }
             }
 
             if (matches.length === 0) {
-                out.innerHTML = "<p style='color:#665500;'>NO DATA FOUND FOR SELECTION</p>";
+                out.innerHTML = "<p style='color:#665500;'>NO VERIFIED DATA FOUND FOR SELECTION</p>";
             } else {
                 matches.sort((a, b) => b.sortVal - a.sortVal).forEach(m => {
                     const card = document.createElement('div');
