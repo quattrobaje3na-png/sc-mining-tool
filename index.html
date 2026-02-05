@@ -23,15 +23,15 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
         .sig-label { color: #665500; font-size: 11px; margin-top:5px; display:block; }
         .mat-breakdown { color: #888; font-size: 10px; margin-top: 10px; border-top: 1px solid #221100; padding-top: 8px; }
-        .mat-item { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px dashed #111; padding-bottom: 2px; }
-        .mat-name { color: #FFB300; text-transform: uppercase; }
-        .mat-val { color: #FFF; font-weight: bold; }
+        .mat-item { display: flex; justify-content: space-between; margin-bottom: 6px; padding-bottom: 2px; }
+        .mat-name { color: #FFB300; text-transform: uppercase; font-weight: bold; }
+        .mat-val { color: #00FF00; font-family: 'Courier New', monospace; }
         #status { font-size:11px; color:#00FF00; margin-bottom:15px; }
     </style>
 </head>
 <body>
     <div class="terminal-header">
-        <h3 style="margin:0; letter-spacing:2px;">> SECTOR_ANALYSIS_v20.1</h3>
+        <h3 style="margin:0; letter-spacing:2px;">> SECTOR_ANALYSIS_v20.2</h3>
         <p id="status">[LINK: ESTABLISHING...]</p>
     </div>
 
@@ -87,7 +87,6 @@
                 const matches = [];
 
                 for (let loc in oreData) {
-                    // Filter generic sectors
                     if (loc.toLowerCase().includes("sector") && !loc.toLowerCase().includes("bloom") && !loc.toLowerCase().includes("akiro")) continue;
 
                     const isPyro = loc.includes('PYR') || loc.includes('RAB') || loc.includes('BLOOM') || loc.includes('AKIRO');
@@ -97,26 +96,31 @@
                     if (system === "NYX" && !isNyx) continue;
                     if (system === "STANTON" && (isPyro || isNyx)) continue;
 
-                    let totalProb = 0;
                     let breakdown = [];
+                    let maxSingleProb = 0;
                     let sigs = [];
 
                     picks.forEach(target => {
                         if (oreData[loc].ores && oreData[loc].ores[target]) {
                             const p = oreData[loc].ores[target].prob;
-                            totalProb += p;
+                            if (p > maxSingleProb) maxSingleProb = p;
                             breakdown.push({ name: target, p: (p * 100).toFixed(1) });
                             if (rsMap[target]) sigs.push(rsMap[target]);
                         }
                     });
 
                     if (breakdown.length > 0) {
-                        matches.push({ name: loc.replace(/_/g, ' '), prob: totalProb, breakdown, sigs: [...new Set(sigs)].join('/') });
+                        matches.push({ 
+                            name: loc.replace(/_/g, ' '), 
+                            maxProb: maxSingleProb, 
+                            breakdown, 
+                            sigs: [...new Set(sigs)].join('/') 
+                        });
                     }
                 }
 
-                // Sort by total combined density
-                matches.sort((a, b) => b.prob - a.prob).forEach(m => {
+                // Sorting by the highest individual rate found in that location
+                matches.sort((a, b) => b.maxProb - a.maxProb).forEach(m => {
                     const div = document.createElement('div');
                     div.className = "result-card";
                     let bHtml = m.breakdown.map(item => `
