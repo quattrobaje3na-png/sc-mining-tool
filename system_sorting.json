@@ -1,46 +1,29 @@
 {
   "star_system_groups": {
     "Stanton": [
-      "AARON_HALO",
-      "HUR", "ABE", "ARI", "ITA", "MAG",
-      "HUR-L1", "HUR-L2", "HUR-L3", "HUR-L4", "HUR-L5",
-      "ARC-L1", "ARC-L2", "ARC-L3", "ARC-L4", "ARC-L5",
-      "MIC-L1", "MIC-L2", "MIC-L4", "MIC-L5",
-      "CRU-L1", "CRU-L4",
-      "LYR", "WAL", "DAY", "CEL", "YEL", "YELB",
-      "MIC", "CAL", "CLI", "EUT", "GLACIUM",
-      "ST-IGB-FXW", "ST-BBR-4JQ", "ST-365-YNZ", "ST-WUO-ZRU", "ST-6IN-PO2",
-      "ST-LBP-UN5", "ST-ODD-E9B", "ST-R08-Y3K", "ST-7LI-0OA", "ST-YTO-GLQ",
-      "ST-01K-I43", "ST-5U5-TLC", "ST-XJZ-JR2", "ST-Q9Q-090", "ST-X92-IVA",
-      "ST-JUG-0KZ", "ST-SAG-2UN", "ST-U5X-NGQ", "ST-UDK-IJX", "ST-AL5-XPD",
-      "ST-RCD-0B3", "ST-G04-CH0", "ST-1XA-3GI", "ST-CVF-T6H", "ST-4R0-NVX",
-      "ST-0YX-07Z", "ST-OYV-JKE", "ST-8CG-OSA", "ST-RSV-8HL", "ST-CZW-RRY",
-      "ST-7YH-JX7", "ST-8PV-WNE", "ST-BSK-IJ5", "ST-A73-HTJ", "ST-BRE-582",
-      "ST-IO3-H1F", "ST-E38-S5G", "ST-W79-2H7", "ST-4PI-3YY", "ST-R75-5PZ",
-      "ST-QXS-NBS", "ST-UU6-1EI", "ST-Q4U-I20", "ST-URB-H3V", "ST-51F-OGH",
-      "ST-Z48-013", "ST-7IQ-29Q", "ST-N6J-XKH", "ST-R7J-WJ7",
+      "AARON_HALO", "HUR", "ABE", "ARI", "ITA", "MAG", "HUR-L1", "HUR-L2", "HUR-L3", "HUR-L4", "HUR-L5",
+      "ARC-L1", "ARC-L2", "ARC-L3", "ARC-L4", "ARC-L5", "MIC-L1", "MIC-L2", "MIC-L4", "MIC-L5",
+      "CRU-L1", "CRU-L4", "LYR", "WAL", "DAY", "CEL", "YEL", "YELB", "MIC", "CAL", "CLI", "EUT",
+      "ST-7LI-0OA", "ST-XJZ-JR2", "ST-Q9Q-090", "ST-AL5-XPD", "ST-RCD-0B3", "ST-CVF-T6H",
       "BGR-560", "DLO-486", "NBD-102", "LHB-976", "JWY-925", "KKE-717"
     ],
-    "Pyro": [
-      "BLO", "IGN", "VAT", "ADI", "FAI", "FUE", "VUU", "TER", "TER_BELT",
-      "PY1", "PY4", "PYR2L4", "MON",
-      "RMB-SURD", "RMB-ONER", "RMB-PURI", "RMB-DREG", "RMB-SHEW", "RMB-NIGH",
-      "RMB-ZARF", "RMB-GREX", "RMB-ELMS", "RMB-EVEN", "RMB-LAZO", "RMB-NAIN",
-      "RMB-AXIL", "RMB-SIJO", "RMB-NENE", "RMB-MARA", "RMB-QINS", "RMB-ION",
-      "RMB-PIZE", "RMB-LOWN", "RMB-CRUE", "RMB-HARK", "RMB-SOWL", "RMB-UMUS",
-      "RMB-MEFF", "RMB-GRAY", "RMB-DARI", "RMB-LUNE", "RMB-HORN", "RMB-PEKE",
-      "RMB-MUGG", "RMB-KIFF", "RMB-YEAD", "RMB-LANX", "RMB-VERD", "RMB-FLAG",
-      "RMB-BORS", "RMB-KYUS"
+    "Nyx": [
+      "DELAMAR",
+      "LEVSKI",
+      "GLACIUM",
+      "NYX_L1",
+      "NYX_L2",
+      "NYX_L3",
+      "NYX_GATEWAY"
     ],
-   "Nyx": [
-    "GLACIUM",
-    "NYX_GATEWAY",
-    "DELAMAR",
-    "NYX_L1",
-    "NYX_L2",
-    "NYX_L3"
-]
+    "Pyro": [
+      "PYR1", "PYR1_L1", "PYR1_L2", "PYR1_L3", "IGN", "AKI", "PYR1_L4", "PYR1_L5",
+      "MONOX", "PYR2_L1", "PYR2_L2", "PYR2_L3", "PYR2_L4", "FAI", "PYR2_L5",
+      "BLOOM", "PYR3_L1", "BLO", "VUU", "PYR3_L3", "PYR3_L4", "PYR3_L5",
+      "PYR4", "PYR4_L1", "PYR4_L2", "PYR4_L3", "PYR4_L4", "ADI", "PYR4_L5",
+      "PYR5", "PYR5_L1", "VAT", "PYR5_L2", "PYR5_L3", "PYR5_L4", "PYR5_L5",
+      "TERMINUS", "PYR6_L1", "PYR6_L2", "PYR6_L3", "PYR6_L4", "PYR6_L5", "FUE",
+      "RUIN", "STANTON_GATEWAY", "PYAM_EXHANG_0_1", "TER", "TER_BELT"
+    ]
   }
 }
-
-
