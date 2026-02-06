@@ -22,7 +22,7 @@
 </head>
 <body>
     <div class="header">
-        <h3>> INTEL_v30.5_STRICT_FIX</h3>
+        <h3>> INTEL_v30.6_CONSOLIDATED</h3>
         <p id="status">INITIATING DATA SYNC...</p>
     </div>
 
@@ -142,7 +142,6 @@
         }).catch(err => {
             statusText.innerText = "SYNC_ERROR: UNABLE TO LOAD " + err.message.toUpperCase();
             statusText.style.color = "red";
-            console.error(err);
         });
 
         function scan() {
@@ -153,15 +152,34 @@
                                .filter(v => v);
 
             out.innerHTML = "";
-            if (!oreData || !sysGroups || !refMapping) return;
+            if (!oreData || !sysGroups || !refMapping) {
+                out.innerHTML = "<p style='color:red;'>ERROR: Data not loaded.</p>";
+                return;
+            }
 
             const activeGroup = sysGroups.star_system_groups[system] || [];
             const validLocations = refMapping.location_mapping || {};
             const matches = [];
 
+            // Helper to clean up ID comparison
+            const normalize = (str) => str.replace(/[-_]/g, '').toUpperCase();
+
             for (let loc in oreData) {
-                if (!activeGroup.includes(loc)) continue;
-                if (!validLocations[loc]) continue;
+                const normLoc = normalize(loc);
+                
+                // Security Check 1: Is the location ID allowed in this system?
+                const inGroup = activeGroup.some(g => normalize(g) === normLoc);
+                if (!inGroup) continue;
+
+                // Security Check 2: Does the ID exist in the reference mapping for display?
+                // We check the original loc and then try a normalized lookup
+                let displayName = validLocations[loc];
+                if(!displayName) {
+                    const refKey = Object.keys(validLocations).find(k => normalize(k) === normLoc);
+                    displayName = validLocations[refKey];
+                }
+                
+                if (!displayName) continue;
 
                 let foundOres = [];
                 let maxProb = 0;
@@ -178,7 +196,7 @@
                 });
 
                 if (foundOres.length > 0) {
-                    matches.push({ name: validLocations[loc], ores: foundOres, sortVal: maxProb });
+                    matches.push({ name: displayName, ores: foundOres, sortVal: maxProb });
                 }
             }
 
