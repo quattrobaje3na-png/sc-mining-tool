@@ -23,13 +23,13 @@
         .loc-title { color: #fff; font-size: 16px; font-weight: bold; display: block; }
         .row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 8px 0; border-bottom: 1px solid #111; }
         .prob { color: #00FF00; font-weight: bold; font-size: 18px; }
-        .meta-text { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .meta-text { font-size: 10px; color: #666; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div id="data-status" class="status-pill backup">INTEL_LOADING...</div>
-        <h2 style="margin:0;">> MINING_INTEL_v48.2</h2>
+        <div id="data-status" class="status-pill backup">INITIATING_SYSTEM...</div>
+        <h2 style="margin:0;">> MINING_INTEL_v48.3</h2>
     </div>
 
     <label>Target_Star_System</label>
@@ -40,38 +40,42 @@
         <option value="Nyx">NYX</option>
     </select>
 
-    <label>Priority_Material_01</label>
-    <select class="ore-sel"></select>
-    <label>Priority_Material_02</label>
-    <select class="ore-sel"></select>
-    <label>Priority_Material_03</label>
-    <select class="ore-sel"></select>
+    <label>Material_Priority_01</label>
+    <select class="ore-sel" id="ore1"></select>
+    <label>Material_Priority_02</label>
+    <select class="ore-sel" id="ore2"></select>
+    <label>Material_Priority_03</label>
+    <select class="ore-sel" id="ore3"></select>
 
     <button onclick="scan()">Initiate Deep Scan</button>
     <div id="results"></div>
 
     <script>
-        // Data Mapping for HUD
-        const ROCK_MAP = {
-            "Quantainium": { type: "Q-Type", sig: 4870 },
-            "Laranite": { type: "P/Q-Type", sig: "4750/4870" },
-            "Agricium": { type: "M-Type", sig: 4850 },
-            "Taranite": { type: "M-Type", sig: 4850 },
-            "Hephaestanite": { type: "C-Type", sig: 4700 },
-            "Borase": { type: "C-Type", sig: 4700 },
-            "Beryl": { type: "S/E-Type", sig: "4720/4900" },
-            "Titanium": { type: "E-Type", sig: 4900 },
-            "Tungsten": { type: "P-Type", sig: 4750 },
-            "Copper": { type: "P-Type", sig: 4750 },
-            "Quartz": { type: "C/P/Q-Type", sig: "4700-4870" }
-        };
-
         const MATERIALS = ["Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", "Laranite", "Lindinium", "Quantainium", "Quartz", "Riccite", "Savrilium", "Silicon", "Stileron", "Taranite", "Tin", "Titanium", "Torite", "Tungsten"];
+        
+        // Context-aware Rock Data for Results
+        const ROCK_MAP = {
+            "Laranite": { type: "P/Q-Type", sig: "1750/1870" },
+            "Quantainium": { type: "Q-Type", sig: "1870" },
+            "Hephaestanite": { type: "C-Type", sig: "1700" },
+            "Beryl": { type: "S/E-Type", sig: "1720/1900" },
+            "Agricium": { type: "M-Type", sig: "1850" },
+            "Taranite": { type: "M-Type", sig: "1850" },
+            "Titanium": { type: "E-Type", sig: "1900" },
+            "Borase": { type: "C-Type", sig: "1700" },
+            "Tungsten": { type: "P-Type", sig: "1750" },
+            "Copper": { type: "P-Type", sig: "1750" },
+            "Corundum": { type: "S-Type", sig: "1720" },
+            "Ammonia": { type: "I-Type", sig: "1660" },
+            "Quartz": { type: "C/P/Q-Type", sig: "1700-1870" },
+            "Torite": { type: "M-Type", sig: "1850" },
+            "Aluminum": { type: "S/E-Type", sig: "1720/1900" }
+        };
 
         let oreData, sortingData;
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
 
-        // Populate Dropdowns immediately
+        // Populate menus immediately from the hardcoded list
         document.querySelectorAll('.ore-sel').forEach(s => {
             s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
                 MATERIALS.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
@@ -80,20 +84,25 @@
         async function init() {
             const status = document.getElementById('data-status');
             try {
-                // Fetch System Groups
+                // Fetch Sorting
                 const sRes = await fetch(BASE_URL + 'system_sorting.json');
-                sortingData = await sRes.json();
+                if(sRes.ok) sortingData = await sRes.json();
 
-                // Fetch Ore Data (Live Priority)
-                let oRes = await fetch(BASE_URL + 'ore_locations_live.json', { cache: "no-store" });
-                if (!oRes.ok) oRes = await fetch(BASE_URL + 'ore_locations.json');
-                
-                oreData = await oRes.json();
-                status.className = "status-pill live";
-                status.innerText = "DB: SYSTEMS_ONLINE";
+                // Dual-Path Fetch for Ore Data (Try Live First)
+                try {
+                    const oRes = await fetch(BASE_URL + 'ore_locations_live.json', { cache: "no-store" });
+                    if (!oRes.ok) throw new Error();
+                    oreData = await oRes.json();
+                    status.className = "status-pill live";
+                    status.innerText = "DB: LIVE_DATA_ACTIVE";
+                } catch (e) {
+                    const oRes = await fetch(BASE_URL + 'ore_locations.json');
+                    oreData = await oRes.json();
+                    status.className = "status-pill backup";
+                    status.innerText = "DB: MASTER_BACKUP_ACTIVE";
+                }
             } catch (err) {
-                status.innerText = "DB: CONNECTION_ERROR";
-                console.error("Initialization Failed:", err);
+                status.innerText = "DB: OFFLINE";
             }
         }
 
@@ -103,11 +112,11 @@
             const picks = Array.from(document.querySelectorAll('.ore-sel')).map(s => s.value).filter(v => v);
             
             out.innerHTML = "";
-            if (!oreData) { console.error("Data not loaded"); return; }
+            if (!oreData) return;
 
             for (let loc in oreData) {
-                // Determine System
-                let locSystem = "Stanton"; 
+                // System Filtering
+                let locSystem = "Stanton";
                 if (sortingData && sortingData.star_system_groups) {
                     for (let sys in sortingData.star_system_groups) {
                         if (sortingData.star_system_groups[sys].includes(loc)) {
@@ -116,18 +125,21 @@
                         }
                     }
                 }
-
                 if (selectedSys !== "ALL" && selectedSys !== locSystem) continue;
 
                 let matches = [];
                 picks.forEach(p => {
-                    // Search in .ores OR directly in the object
-                    const dataObj = oreData[loc].ores || oreData[loc];
-                    if (dataObj[p]) {
-                        const meta = ROCK_MAP[p] || { type: "GENERIC", sig: "SCAN" };
+                    const locOres = oreData[loc].ores || oreData[loc];
+                    // Search using uppercase key matching
+                    const matKey = Object.keys(locOres).find(k => k.toUpperCase() === p.toUpperCase());
+                    
+                    if (matKey && locOres[matKey]) {
+                        const meta = ROCK_MAP[p] || { type: "GEN-TYPE", sig: "SCAN" };
+                        const probValue = locOres[matKey].prob !== undefined ? locOres[matKey].prob : locOres[matKey];
+                        
                         matches.push({ 
                             name: p.toUpperCase(), 
-                            prob: (dataObj[p] * 100).toFixed(1),
+                            prob: (probValue * 100).toFixed(1),
                             rock: meta.type,
                             sig: meta.sig
                         });
@@ -137,7 +149,6 @@
                 if (matches.length > 0) {
                     const card = document.createElement('div');
                     card.className = "card";
-
                     let rows = matches.map(m => `
                         <div class="row">
                             <div style="display:flex; flex-direction:column;">
