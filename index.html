@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Citizen Starter Guide - Mining HUD v51.7</title>
+    <title>Citizen Starter Guide - Mining HUD v51.8</title>
     <style>
         body { background:#000; color:#FFB300; font-family: monospace; padding:15px; }
         .header { border-bottom:1px solid #332200; margin-bottom:20px; }
@@ -22,13 +22,12 @@
         .prob { color: #00FF00; font-weight: bold; font-size: 18px; }
         .meta-text { font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 2px; }
         .sig-pill { color: #00FF00; background: #002200; border: 1px solid #00FF00; padding: 1px 4px; font-size: 10px; font-weight: bold; }
-        .rank-label { font-size: 9px; color: #666; font-weight: normal; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div id="data-status" class="status-pill live">HUD: RANKED_ORE_v51.7</div>
-        <h2 style="margin:0;">> MINING_INTEL_v51.7</h2>
+        <div id="data-status" class="status-pill live">HUD: RANKED_SURFACE_FIX_v51.8</div>
+        <h2 style="margin:0;">> MINING_INTEL_v51.8</h2>
     </div>
 
     <label>Target_Star_System</label>
@@ -39,12 +38,12 @@
         <option value="Nyx">NYX</option>
     </select>
 
-    <label>Target_Materials (RANKED BY COMBINED ODDS)</label>
+    <label>Priority_Materials (Sorted by Combined Odds)</label>
     <select class="ore-sel"></select>
     <select class="ore-sel"></select>
     <select class="ore-sel"></select>
 
-    <button onclick="scan()">Generate Optimal Routes</button>
+    <button onclick="scan()">Initiate Deep Scan</button>
     <div id="results"></div>
 
     <script>
@@ -53,28 +52,37 @@
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
 
         document.querySelectorAll('.ore-sel').forEach(s => {
-            s.innerHTML = '<option value="">- SELECT -</option>' + MATERIALS.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
+            s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
+                MATERIALS.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
         });
 
         async function init() {
             try {
                 const [sRes, rRes, fRes, pRes, oRes] = await Promise.all([
-                    fetch(BASE_URL+'system_sorting.json'), fetch(BASE_URL+'reference.json'),
-                    fetch(BASE_URL+'filter.json'), fetch(BASE_URL+'probabilities.json'),
-                    fetch(BASE_URL+'ore_locations.json')
+                    fetch(BASE_URL + 'system_sorting.json'), fetch(BASE_URL + 'reference.json'),
+                    fetch(BASE_URL + 'filter.json'), fetch(BASE_URL + 'probabilities.json'),
+                    fetch(BASE_URL + 'ore_locations.json')
                 ]);
                 sortingData = await sRes.json(); referenceData = await rRes.json();
                 filterData = await fRes.json(); probData = await pRes.json(); oreData = await oRes.json();
-            } catch (err) { console.error(err); }
+            } catch (err) { document.getElementById('data-status').innerText = "HUD: SYNC_ERROR"; }
         }
 
         function getBestHUD(material, system, locId) {
             const sysData = probData[system];
             if (!sysData) return { type: "GENERIC", sig: "SCAN" };
+
             const locUp = locId.toUpperCase();
             const isNyx = system === "Nyx";
-            const isOrbital = locUp.includes("RMB-") || locUp.includes("RAB-") || locUp.includes("BGR-") || locUp.startsWith("R0");
-            const isSurface = !isNyx && !isOrbital && !locUp.includes("HALO") && !locUp.includes("CLUSTER") && !locUp.startsWith("ST-");
+            
+            // HDMS FIX: HDMS/HDSF are physically on the ground.
+            const isHDMS = locUp.includes("HDMS-") || locUp.includes("HDSF-") || locUp.includes("HDMO-");
+            
+            // RMB/RAB/Prefixes for Stations are Space-based Asteroid logic (unless it's an HDMS station)
+            const isOrbital = (locUp.includes("RMB-") || locUp.includes("RAB-") || locUp.includes("BGR-") || locUp.startsWith("R0")) && !isHDMS;
+            
+            // Final Surface Logic: Bypass for Nyx and Orbital, Force for HDMS or non-space prefixes.
+            const isSurface = !isNyx && (isHDMS || (!isOrbital && !locUp.includes("HALO") && !locUp.includes("CLUSTER") && !locUp.startsWith("ST-")));
             
             const source = isSurface ? sysData.surface_deposits : sysData.asteroid_types;
             if (!source) return { type: "GENERIC", sig: "SCAN" };
@@ -83,7 +91,12 @@
             for (let type in source) {
                 const matKey = (material === "Quantainium") ? "Quantanium" : material;
                 const p = source[type].probabilities ? source[type].probabilities[matKey] || 0 : 0;
-                if (p > maxP) { maxP = p; bestType = isSurface ? { type, sig: `SHIP:${source[type].ship_sig} | HAND:${source[type].hand_sig}` } : { type, sig: source[type].sig }; }
+                if (p > maxP) {
+                    maxP = p;
+                    bestType = isSurface ? 
+                        { type: type, sig: `SHIP:4000 | HAND:3000` } : 
+                        { type: type, sig: source[type].sig };
+                }
             }
             return bestType || { type: "GENERIC", sig: "SCAN" };
         }
@@ -104,20 +117,30 @@
             for (let locId in oreData) {
                 if (excluded.includes(locId)) continue;
                 const locUp = locId.toUpperCase();
+                
                 let locSystem = "UNKNOWN";
-                if (locUp.includes("NYX") || nyxPrefixes.some(p => locUp.startsWith(p))) { locSystem = "Nyx"; }
-                else { for (let sys in (sortingData.star_system_groups || {})) { if (sortingData.star_system_groups[sys].some(id => locId.startsWith(id))) { locSystem = sys; break; } } }
+                if (locUp.includes("NYX") || nyxPrefixes.some(p => locUp.startsWith(p))) {
+                    locSystem = "Nyx";
+                } else {
+                    for (let sys in (sortingData.star_system_groups || {})) {
+                        if (sortingData.star_system_groups[sys].some(id => locId.startsWith(id))) {
+                            locSystem = sys; break;
+                        }
+                    }
+                }
+
                 if (selectedSys !== "ALL" && selectedSys !== locSystem) continue;
 
                 let matches = [];
-                let totalWeight = 0;
+                let totalProb = 0;
+
                 picks.forEach(p => {
                     const locOres = oreData[locId].ores || oreData[locId];
                     const matKey = Object.keys(locOres).find(k => k.toUpperCase() === p.toUpperCase());
                     if (matKey && locOres[matKey]) {
                         const hud = getBestHUD(p, locSystem, locId);
                         const probValue = locOres[matKey].prob !== undefined ? locOres[matKey].prob : locOres[matKey];
-                        totalWeight += probValue;
+                        totalProb += probValue;
                         matches.push({ name: p.toUpperCase(), prob: (probValue * 100).toFixed(1), rock: hud.type, sig: hud.sig });
                     }
                 });
@@ -127,12 +150,12 @@
                         displayName: (mapping[locId] || locId).toUpperCase(),
                         system: locSystem.toUpperCase(),
                         matches: matches,
-                        weight: totalWeight
+                        weight: totalProb
                     });
                 }
             }
 
-            // PRIMARY FIX: SORT BY TOTAL PROBABILITY
+            // RANK BY TOTAL PROBABILITY PERCENTAGE
             resultsArray.sort((a, b) => b.weight - a.weight);
 
             resultsArray.forEach(res => {
