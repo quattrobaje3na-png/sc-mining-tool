@@ -28,8 +28,8 @@
 </head>
 <body>
     <div class="header">
-        <div id="data-status" class="status-pill backup">INITIATING...</div>
-        <h2 style="margin:0;">> MINING_INTEL_v48.5</h2>
+        <div id="data-status" class="status-pill backup">RE-LOADING_INTEL...</div>
+        <h2 style="margin:0;">> MINING_INTEL_v48.6</h2>
     </div>
 
     <label>Target_Star_System</label>
@@ -41,19 +41,18 @@
     </select>
 
     <label>Material_Priority_01</label>
-    <select class="ore-sel"></select>
+    <select class="ore-sel" id="ore1"></select>
     <label>Material_Priority_02</label>
-    <select class="ore-sel"></select>
+    <select class="ore-sel" id="ore2"></select>
     <label>Material_Priority_03</label>
-    <select class="ore-sel"></select>
+    <select class="ore-sel" id="ore3"></select>
 
     <button onclick="scan()">Initiate Deep Scan</button>
     <div id="results"></div>
 
     <script>
-        // HARDCODED MATERIALS - Menus will NEVER be empty again
         const MATERIALS = ["Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", "Laranite", "Lindinium", "Quantainium", "Quartz", "Riccite", "Savrilium", "Silicon", "Stileron", "Taranite", "Tin", "Titanium", "Torite", "Tungsten"];
-
+        
         const ROCK_MAP = {
             "Laranite": { type: "P/Q-Type", sig: "4750/4870" },
             "Quantainium": { type: "Q-Type", sig: "4870" },
@@ -75,7 +74,7 @@
         let oreData, sortingData;
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
 
-        // Immediately populate dropdowns
+        // Immediate menu population
         document.querySelectorAll('.ore-sel').forEach(s => {
             s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
                 MATERIALS.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
@@ -84,11 +83,11 @@
         async function init() {
             const status = document.getElementById('data-status');
             try {
-                // Fetch Sorting Groups
+                // 1. Fetch Sorting File
                 const sRes = await fetch(BASE_URL + 'system_sorting.json');
-                if(sRes.ok) sortingData = await sRes.json();
+                sortingData = await sRes.json();
 
-                // Fetch Ore Data (Try Live First)
+                // 2. Fetch Ore Data (Dual-Path)
                 try {
                     const oRes = await fetch(BASE_URL + 'ore_locations_live.json', { cache: "no-store" });
                     if (!oRes.ok) throw new Error();
@@ -102,7 +101,7 @@
                     status.innerText = "DB: MASTER_BACKUP_ACTIVE";
                 }
             } catch (err) {
-                status.innerText = "DB: OFFLINE";
+                status.innerText = "DB: CONNECTION_ERROR";
             }
         }
 
@@ -112,25 +111,26 @@
             const picks = Array.from(document.querySelectorAll('.ore-sel')).map(s => s.value).filter(v => v);
             
             out.innerHTML = "";
-            if (!oreData) return;
+            if (!oreData || !sortingData) return;
 
             for (let loc in oreData) {
-                // Determine System Grouping
-                let locSystem = "Stanton";
-                if (sortingData && sortingData.star_system_groups) {
+                // SYSTEM MAPPING: Check if the location ID starts with any prefix from system_sorting.json
+                let locSystem = "UNKNOWN";
+                if (sortingData.star_system_groups) {
                     for (let sys in sortingData.star_system_groups) {
-                        if (sortingData.star_system_groups[sys].some(s => loc.includes(s))) {
+                        // Match full strings or prefixes (e.g. "ST-" prefix from the reference file)
+                        if (sortingData.star_system_groups[sys].some(id => loc.startsWith(id) || loc === id)) {
                             locSystem = sys;
                             break;
                         }
                     }
                 }
+
                 if (selectedSys !== "ALL" && selectedSys !== locSystem) continue;
 
                 let matches = [];
                 picks.forEach(p => {
                     const locOres = oreData[loc].ores || oreData[loc];
-                    // Strict Case-Insensitive Key Matching
                     const matKey = Object.keys(locOres).find(k => k.toUpperCase() === p.toUpperCase());
                     
                     if (matKey && locOres[matKey]) {
