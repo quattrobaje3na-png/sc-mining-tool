@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Citizen Starter Guide - Mining HUD v51.3</title>
+    <title>Citizen Starter Guide - Mining HUD v51.5</title>
     <style>
         body { background:#000; color:#FFB300; font-family: monospace; padding:15px; }
         .header { border-bottom:1px solid #332200; margin-bottom:20px; }
@@ -26,8 +26,8 @@
 </head>
 <body>
     <div class="header">
-        <div id="data-status" class="status-pill live">HUD: NYX_BYPASS_v51.3</div>
-        <h2 style="margin:0;">> MINING_INTEL_v51.3</h2>
+        <div id="data-status" class="status-pill live">HUD: ORBITAL_RMB_SYNC_v51.5</div>
+        <h2 style="margin:0;">> MINING_INTEL_v51.5</h2>
     </div>
 
     <label>Target_Star_System</label>
@@ -71,9 +71,13 @@
             const sysData = probData[system];
             if (!sysData) return { type: "GENERIC", sig: "SCAN" };
 
-            // THE NYX BYPASS: Force asteroid data for Nyx, check surface for others
+            const locUp = locId.toUpperCase();
+            // NYX and RMB/RAB/Prefixes for Orbital Stations are ALWAYS Space-based (Asteroid Types)
             const isNyx = system === "Nyx";
-            const isSurface = !isNyx && !locId.includes("HALO") && !locId.includes("CLUSTER") && !locId.startsWith("ST-") && !locId.startsWith("RAB-");
+            const isOrbital = locUp.includes("RMB-") || locUp.includes("RAB-") || locUp.includes("BGR-") || locUp.startsWith("R0");
+            
+            // Bypass surface check if Nyx or Orbital. Stanton/Pyro Ground moon bases use surface_deposits.
+            const isSurface = !isNyx && !isOrbital && !locUp.includes("HALO") && !locUp.includes("CLUSTER") && !locUp.startsWith("ST-");
             
             const source = isSurface ? sysData.surface_deposits : sysData.asteroid_types;
             if (!source) return { type: "GENERIC", sig: "SCAN" };
