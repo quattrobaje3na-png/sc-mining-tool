@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Citizen Starter Guide - Mining HUD v52.0</title>
+    <title>Citizen Starter Guide - Mining HUD v52.1</title>
     <style>
         body { background:#000; color:#FFB300; font-family: monospace; padding:15px; }
         .header { border-bottom:1px solid #332200; margin-bottom:20px; }
@@ -26,8 +26,8 @@
 </head>
 <body>
     <div class="header">
-        <div id="data-status" class="status-pill live">HUD: SPACE_BYPASS_v52.0</div>
-        <h2 style="margin:0;">> MINING_INTEL_v52.0</h2>
+        <div id="data-status" class="status-pill live">HUD: DIRECT_LOGIC_v52.1</div>
+        <h2 style="margin:0;">> MINING_INTEL_v52.1</h2>
     </div>
 
     <label>Target_Star_System</label>
@@ -38,12 +38,12 @@
         <option value="Nyx">NYX</option>
     </select>
 
-    <label>Priority_Materials (Sorted by Combined Odds)</label>
+    <label>Priority_Materials (Ranked by Odds)</label>
     <select class="ore-sel"></select>
     <select class="ore-sel"></select>
     <select class="ore-sel"></select>
 
-    <button onclick="scan()">Initiate Deep Scan</button>
+    <button onclick="scan()">Initiate Scan</button>
     <div id="results"></div>
 
     <script>
@@ -52,7 +52,7 @@
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
 
         document.querySelectorAll('.ore-sel').forEach(s => {
-            s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
+            s.innerHTML = '<option value="">- SELECT -</option>' + 
                 MATERIALS.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
         });
 
@@ -68,38 +68,35 @@
             } catch (err) { document.getElementById('data-status').innerText = "HUD: SYNC_ERROR"; }
         }
 
-        function getBestHUD(material, system, locId) {
+        function getBestHUD(material, system, locId, displayName) {
             const sysData = probData[system];
             if (!sysData) return { type: "GENERIC", sig: "SCAN" };
 
-            const locUp = locId.toUpperCase();
+            const rawId = locId.toUpperCase();
+            const name = displayName.toUpperCase();
             const isNyx = system === "Nyx";
             
-            // 1. HDMS/HDSF are physically on the ground.
-            const isHDMS = locUp.includes("HDMS-") || locUp.includes("HDSF-") || locUp.includes("HDMO-");
+            // 1. SPACE/ORBITAL CHECK: Direct match for keywords in ID or Name
+            const spaceKeywords = ["BELT", "RING", "HALO", "CLUSTER", "RMB-", "RAB-", "BGR-", " L1", " L2", " L3", " L4", " L5", "-L1", "-L2", "-L3", "-L4", "-L5"];
+            const isSpace = spaceKeywords.some(key => rawId.includes(key) || name.includes(key)) || rawId.startsWith("R0");
             
-            // 2. SPACE BYPASS: Explicitly identify anything in orbit.
-            const isSpace = locUp.includes(" L") || locUp.includes("-L") || 
-                            locUp.includes("RMB-") || locUp.includes("RAB-") || 
-                            locUp.includes("BGR-") || locUp.startsWith("R0") ||
-                            locUp.includes("BELT") || locUp.includes("RING") ||
-                            locUp.includes("HALO") || locUp.includes("CLUSTER");
-            
-            // 3. FINAL LOGIC: It's only a surface if it's NOT Nyx, NOT Space, OR it is an HDMS station.
+            // 2. SURFACE CHECK: Force surface if it's NOT Nyx AND (NOT Space OR it's an HDMS station)
+            const isHDMS = rawId.includes("HDMS") || name.includes("HDMS") || rawId.includes("HDSF");
             const isSurface = !isNyx && (isHDMS || !isSpace);
             
             const source = isSurface ? sysData.surface_deposits : sysData.asteroid_types;
             if (!source) return { type: "GENERIC", sig: "SCAN" };
 
             let bestType = null; let maxP = -1;
+            const matKey = (material === "Quantainium") ? "Quantanium" : material;
+
             for (let type in source) {
-                const matKey = (material === "Quantainium") ? "Quantanium" : material;
                 const p = source[type].probabilities ? source[type].probabilities[matKey] || 0 : 0;
                 if (p > maxP) {
                     maxP = p;
                     bestType = isSurface ? 
                         { type: type, sig: `SHIP:4000 | HAND:3000` } : 
-                        { type: type, sig: source[type].sig };
+                        { type: type, sig: source[type].sig || "4000" };
                 }
             }
             return bestType || { type: "GENERIC", sig: "SCAN" };
@@ -121,6 +118,7 @@
             for (let locId in oreData) {
                 if (excluded.includes(locId)) continue;
                 const locUp = locId.toUpperCase();
+                const displayName = (mapping[locId] || locId).toUpperCase();
                 
                 let locSystem = "UNKNOWN";
                 if (locUp.includes("NYX") || nyxPrefixes.some(p => locUp.startsWith(p))) {
@@ -136,30 +134,24 @@
                 if (selectedSys !== "ALL" && selectedSys !== locSystem) continue;
 
                 let matches = [];
-                let totalProb = 0;
+                let totalWeight = 0;
 
                 picks.forEach(p => {
                     const locOres = oreData[locId].ores || oreData[locId];
                     const matKey = Object.keys(locOres).find(k => k.toUpperCase() === p.toUpperCase());
                     if (matKey && locOres[matKey]) {
-                        const hud = getBestHUD(p, locSystem, locId);
+                        const hud = getBestHUD(p, locSystem, locId, displayName);
                         const probValue = locOres[matKey].prob !== undefined ? locOres[matKey].prob : locOres[matKey];
-                        totalProb += probValue;
+                        totalWeight += probValue;
                         matches.push({ name: p.toUpperCase(), prob: (probValue * 100).toFixed(1), rock: hud.type, sig: hud.sig });
                     }
                 });
 
                 if (matches.length > 0) {
-                    resultsArray.push({
-                        displayName: (mapping[locId] || locId).toUpperCase(),
-                        system: locSystem.toUpperCase(),
-                        matches: matches,
-                        weight: totalProb
-                    });
+                    resultsArray.push({ displayName, system: locSystem.toUpperCase(), matches, weight: totalWeight });
                 }
             }
 
-            // RANK BY TOTAL PROBABILITY PERCENTAGE
             resultsArray.sort((a, b) => b.weight - a.weight);
 
             resultsArray.forEach(res => {
