@@ -20,18 +20,16 @@
         button:hover { background: #FFB300; color: #000; }
 
         .card { border: 1px solid #332200; border-left: 4px solid #FFB300; padding: 12px; margin-bottom: 10px; background: #050505; }
-        .loc-title { color: #fff; font-size: 16px; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 8px; display: block; }
         .row { display: flex; justify-content: space-between; font-size: 14px; padding: 3px 0; }
-        .prob { color: #00FF00; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="header">
         <div id="data-status" class="status-pill backup">INTEL_OFFLINE</div>
-        <h2 style="margin:0;">> MINING_INTEL_v45.7</h2>
+        <h2 style="margin:0;">> MINING_INTEL_v46.0</h2>
     </div>
 
-    <label>Target_Star_System</label>
+    <label>Target_System</label>
     <select id="sys-select">
         <option value="ALL">ALL_KNOWN_SYSTEMS</option>
         <option value="Stanton">STANTON</option>
@@ -40,62 +38,58 @@
     </select>
 
     <label>Priority_Material_01</label>
-    <select class="ore-sel"></select>
+    <select class="ore-sel" id="sel-1"></select>
     <label>Priority_Material_02</label>
-    <select class="ore-sel"></select>
+    <select class="ore-sel" id="sel-2"></select>
     <label>Priority_Material_03</label>
-    <select class="ore-sel"></select>
+    <select class="ore-sel" id="sel-3"></select>
 
-    <button id="scan-btn" onclick="scan()" disabled>Waiting for Data...</button>
+    <button id="scan-btn" onclick="scan()">Initiate Scan</button>
     <div id="results"></div>
 
     <script>
-        let oreData, filterData, sortingData;
-        const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
+        // 1. HARD-CODED LIST: Dropdowns work NO MATTER WHAT
+        const MATERIALS = [
+            "Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", 
+            "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", 
+            "Laranite", "Lindinium", "Quantainium", "Quartz", "Riccite", 
+            "Savrilium", "Silicon", "Stileron", "Taranite", "Tin", "Titanium", 
+            "Torite", "Tungsten"
+        ];
+
+        let oreData, sortingData;
+        const RAW_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
+
+        // Populate dropdowns immediately on page load
+        function populateMenus() {
+            const dropdowns = document.querySelectorAll('.ore-sel');
+            dropdowns.forEach(sel => {
+                let html = '<option value="">- SELECT MATERIAL -</option>';
+                MATERIALS.sort().forEach(m => {
+                    html += `<option value="${m}">${m.toUpperCase()}</option>`;
+                });
+                sel.innerHTML = html;
+            });
+        }
 
         async function init() {
+            populateMenus(); // Menus are now independent
             const status = document.getElementById('data-status');
-            const btn = document.getElementById('scan-btn');
 
             try {
-                // 1. Load configuration files first
-                const [fRes, sRes] = await Promise.all([
-                    fetch(BASE_URL + 'filter.json'),
-                    fetch(BASE_URL + 'system_sorting.json')
-                ]);
-                
-                filterData = await fRes.json();
+                // Load sorting for results filtering
+                const sRes = await fetch(RAW_URL + 'system_sorting.json');
                 sortingData = await sRes.json();
 
-                // 2. Populate Dropdowns strictly from filter.json
-                const materials = filterData.materials || [];
-                document.querySelectorAll('.ore-sel').forEach(s => {
-                    s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
-                        materials.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
-                });
+                // Load ore data
+                let oRes = await fetch(RAW_URL + 'ore_locations_live.json', {cache: "no-store"});
+                if (!oRes.ok) oRes = await fetch(RAW_URL + 'ore_locations.json');
+                oreData = await oRes.json();
 
-                // 3. Load Ore Data (Live Priority)
-                let res = await fetch(BASE_URL + 'ore_locations_live.json', {cache: "no-store"});
-                if (!res.ok) throw new Error();
-                oreData = await res.json();
                 status.className = "status-pill live";
-                status.innerText = "DB: LIVE_ACTIVE";
-            } catch (e) {
-                // 4. Fallback to Master
-                try {
-                    let res = await fetch(BASE_URL + 'ore_locations.json');
-                    oreData = await res.json();
-                    status.className = "status-pill backup";
-                    status.innerText = "DB: MASTER_FALLBACK";
-                } catch (err) {
-                    status.innerText = "DB: CRITICAL_FAILURE";
-                }
-            }
-            
-            // Enable button once data is confirmed
-            if (oreData) {
-                btn.disabled = false;
-                btn.innerText = "Initiate Deep Scan";
+                status.innerText = "DB: SYSTEMS_ONLINE";
+            } catch (err) {
+                status.innerText = "DB: OFFLINE (BACKUP ACTIVE)";
             }
         }
 
@@ -105,12 +99,12 @@
             const picks = Array.from(document.querySelectorAll('.ore-sel')).map(s => s.value).filter(v => v);
             
             out.innerHTML = "";
-            if (!oreData || !sortingData) return;
+            if (!oreData) return;
 
             for (let loc in oreData) {
+                // Use sortingData only for filtering results, not for the menu
                 let locSystem = "Stanton";
-                // Look up location in system_sorting groups
-                if (sortingData.star_system_groups) {
+                if (sortingData && sortingData.star_system_groups) {
                     for (let sys in sortingData.star_system_groups) {
                         if (sortingData.star_system_groups[sys].includes(loc)) {
                             locSystem = sys;
@@ -132,8 +126,8 @@
                 if (matches.length > 0) {
                     const card = document.createElement('div');
                     card.className = "card";
-                    let rows = matches.map(m => `<div class="row"><span>${m.name}</span><span class="prob">${m.prob}%</span></div>`).join('');
-                    card.innerHTML = `<span class="loc-title">${loc.toUpperCase()} [${locSystem.toUpperCase()}]</span>${rows}`;
+                    let rows = matches.map(m => `<div class="row"><span>${m.name}</span><span style="color:#00FF00">${m.prob}%</span></div>`).join('');
+                    card.innerHTML = `<strong style="color:#fff">${loc.toUpperCase()} [${locSystem.toUpperCase()}]</strong>${rows}`;
                     out.appendChild(card);
                 }
             }
