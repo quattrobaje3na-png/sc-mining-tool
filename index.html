@@ -9,7 +9,6 @@
         .header { border-bottom:1px solid #332200; margin-bottom:20px; }
         .status-pill { display: inline-block; padding: 2px 8px; font-size: 10px; border-radius: 3px; font-weight: bold; margin-bottom: 10px; }
         .live { background: #004400; color: #00FF00; border: 1px solid #00FF00; }
-        .backup { background: #442200; color: #FFB300; border: 1px solid #FFB300; }
         
         label { font-size: 10px; color: #665500; display: block; margin-top: 10px; }
         select, button { 
@@ -19,18 +18,18 @@
         button { background: #1a1a1a; cursor: pointer; text-transform: uppercase; font-weight: bold; }
         button:hover { background: #FFB300; color: #000; }
 
-        .card { border: 1px solid #332200; border-left: 4px solid #FFB300; padding: 12px; margin-bottom: 10px; background: #050505; }
-        .loc-title { color: #fff; font-size: 14px; font-weight: bold; display: block; line-height: 1.4; }
-        .row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 8px 0; border-bottom: 1px solid #111; }
+        .card { border: 1px solid #332200; border-left: 4px solid #FFB300; padding: 12px; margin-bottom: 15px; background: #050505; }
+        .loc-title { color: #fff; font-size: 15px; font-weight: bold; display: block; line-height: 1.4; }
+        .row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 10px 0; border-bottom: 1px solid #111; }
         .prob { color: #00FF00; font-weight: bold; font-size: 18px; }
-        .meta-text { font-size: 10px; color: #666; text-transform: uppercase; }
-        .unmapped { color: #ff0000; font-size: 9px; font-style: italic; }
+        .meta-text { font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 2px; }
+        .sig-pill { color: #00FF00; background: #002200; border: 1px solid #00FF00; padding: 1px 4px; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div id="data-status" class="status-pill backup">RE-SCANNING_ST_INDEX...</div>
-        <h2 style="margin:0;">> MINING_INTEL_v49.3</h2>
+        <div id="data-status" class="status-pill live">HUD: SYSTEM_INTEGRATION_v50.8</div>
+        <h2 style="margin:0;">> MINING_INTEL_v50.8</h2>
     </div>
 
     <label>Target_Star_System</label>
@@ -41,34 +40,17 @@
         <option value="Nyx">NYX</option>
     </select>
 
-    <label>Priority_Material_01</label>
-    <select class="ore-sel"></select>
-    <label>Priority_Material_02</label>
-    <select class="ore-sel"></select>
-    <label>Priority_Material_03</label>
-    <select class="ore-sel"></select>
+    <label>Priority_Material_01</label><select class="ore-sel"></select>
+    <label>Priority_Material_02</label><select class="ore-sel"></select>
+    <label>Priority_Material_03</label><select class="ore-sel"></select>
 
     <button onclick="scan()">Initiate Deep Scan</button>
     <div id="results"></div>
 
     <script>
         const MATERIALS = ["Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", "Laranite", "Lindinium", "Quantainium", "Quartz", "Riccite", "Savrilium", "Silicon", "Stileron", "Taranite", "Tin", "Titanium", "Torite", "Tungsten"];
-        
-        const ROCK_MAP = {
-            "Quantainium": { type: "Q-Type", sig: 4870 },
-            "Laranite": { type: "P/Q-Type", sig: "4750/4870" },
-            "Agricium": { type: "M-Type", sig: 4850 },
-            "Taranite": { type: "M-Type", sig: 4850 },
-            "Hephaestanite": { type: "C-Type", sig: 4700 },
-            "Borase": { type: "C-Type", sig: 4700 },
-            "Beryl": { type: "S/E-Type", sig: "4720/4900" },
-            "Titanium": { type: "E-Type", sig: 4900 },
-            "Tungsten": { type: "P-Type", sig: 4750 },
-            "Copper": { type: "P-Type", sig: 4750 },
-            "Quartz": { type: "C/P/Q-Type", sig: "4700-4870" }
-        };
 
-        let oreData, sortingData, referenceData, filterData;
+        let oreData, sortingData, referenceData, filterData, probData;
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
 
         document.querySelectorAll('.ore-sel').forEach(s => {
@@ -77,65 +59,67 @@
         });
 
         async function init() {
-            const status = document.getElementById('data-status');
             try {
-                const [sRes, rRes, fRes] = await Promise.all([
+                const [sRes, rRes, fRes, pRes, oRes] = await Promise.all([
                     fetch(BASE_URL + 'system_sorting.json'),
                     fetch(BASE_URL + 'reference.json'),
-                    fetch(BASE_URL + 'filter.json')
+                    fetch(BASE_URL + 'filter.json'),
+                    fetch(BASE_URL + 'probabilities.json'),
+                    fetch(BASE_URL + 'ore_locations.json')
                 ]);
                 sortingData = await sRes.json();
                 referenceData = await rRes.json();
                 filterData = await fRes.json();
+                probData = await pRes.json();
+                oreData = await oRes.json();
+            } catch (err) { document.getElementById('data-status').innerText = "HUD: OFFLINE"; }
+        }
 
-                try {
-                    const oRes = await fetch(BASE_URL + 'ore_locations_live.json', { cache: "no-store" });
-                    if (!oRes.ok) throw new Error();
-                    oreData = await oRes.json();
-                    status.className = "status-pill live";
-                    status.innerText = "HUD: FULL_DISCOVERY_ACTIVE";
-                } catch (e) {
-                    const oRes = await fetch(BASE_URL + 'ore_locations.json');
-                    oreData = await oRes.json();
-                    status.className = "status-pill backup";
-                    status.innerText = "HUD: MASTER_DISCOVERY_ACTIVE";
+        function getBestHUD(material, system, isSurface) {
+            const sysData = probData[system];
+            if (!sysData) return { type: "GENERIC", sig: "SCAN" };
+
+            let bestType = null;
+            let maxP = -1;
+            const source = isSurface ? sysData.surface_deposits : sysData.asteroid_types;
+
+            for (let type in source) {
+                const p = source[type].probabilities[material] || 0;
+                if (p > maxP) {
+                    maxP = p;
+                    if (isSurface) {
+                        bestType = { type: type, sig: `SHIP:${source[type].ship_sig} | HAND:${source[type].hand_sig}` };
+                    } else {
+                        bestType = { type: type, sig: source[type].sig };
+                    }
                 }
-            } catch (err) {
-                status.innerText = "HUD: SYNC_ERROR";
             }
+            return bestType || { type: "GENERIC", sig: "SCAN" };
         }
 
         function scan() {
             const out = document.getElementById('results');
             const selectedSys = document.getElementById('sys-select').value;
             const picks = Array.from(document.querySelectorAll('.ore-sel')).map(s => s.value).filter(v => v);
-            
             out.innerHTML = "";
-            if (!oreData || !referenceData) return;
 
-            const excludedLocs = filterData.exclude_locations || [];
             const mapping = referenceData.location_mapping || {};
+            const excluded = filterData.exclude_locations || [];
 
             for (let locId in oreData) {
-                if (excludedLocs.includes(locId)) continue;
+                if (excluded.includes(locId)) continue;
 
-                // NAME RESOLUTION: Use mapping, else show technical ID with red flag
-                const isMapped = mapping.hasOwnProperty(locId);
-                const displayName = mapping[locId] || locId;
-                const unmappedFlag = !isMapped && locId.startsWith('ST-') ? ' <span class="unmapped">[UNMAPPED CLUSTER]</span>' : '';
-
-                // SYSTEM RESOLUTION: 
+                // Identify System
                 let locSystem = "UNKNOWN";
-                if (sortingData && sortingData.star_system_groups) {
-                    for (let sys in sortingData.star_system_groups) {
-                        if (sortingData.star_system_groups[sys].some(id => locId.startsWith(id))) {
-                            locSystem = sys;
-                            break;
-                        }
+                for (let sys in (sortingData.star_system_groups || {})) {
+                    if (sortingData.star_system_groups[sys].some(id => locId.startsWith(id))) {
+                        locSystem = sys; break;
                     }
                 }
-
                 if (selectedSys !== "ALL" && selectedSys !== locSystem) continue;
+
+                // Determine Surface vs Space (Space IDs usually contain Cluster/Belt or start with ST/RAB/BGR)
+                const isSurface = !locId.includes("HALO") && !locId.includes("BELT") && !locId.startsWith("ST-") && !locId.startsWith("RAB-") && !locId.startsWith("BGR-");
 
                 let matches = [];
                 picks.forEach(p => {
@@ -143,15 +127,9 @@
                     const matKey = Object.keys(locOres).find(k => k.toUpperCase() === p.toUpperCase());
                     
                     if (matKey && locOres[matKey]) {
-                        const meta = ROCK_MAP[p] || { type: "GEN-TYPE", sig: "SCAN" };
+                        const hud = getBestHUD(p, locSystem, isSurface);
                         const probValue = locOres[matKey].prob !== undefined ? locOres[matKey].prob : locOres[matKey];
-                        
-                        matches.push({ 
-                            name: p.toUpperCase(), 
-                            prob: (probValue * 100).toFixed(1),
-                            rock: meta.type,
-                            sig: meta.sig
-                        });
+                        matches.push({ name: p.toUpperCase(), prob: (probValue * 100).toFixed(1), rock: hud.type, sig: hud.sig });
                     }
                 });
 
@@ -161,16 +139,16 @@
                     let rows = matches.map(m => `
                         <div class="row">
                             <div style="display:flex; flex-direction:column;">
-                                <span style="font-weight:bold; color:#fff;">${m.name}</span>
-                                <span class="meta-text">HUNT: ${m.rock} | SIG: ${m.sig}</span>
+                                <span style="font-weight:bold; color:#fff;">${m.name} <span class="sig-pill">${m.sig}</span></span>
+                                <span class="meta-text">HUNT: ${m.rock}</span>
                             </div>
                             <span class="prob">${m.prob}%</span>
                         </div>
                     `).join('');
 
                     card.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px;">
-                            <span class="loc-title">${displayName.toUpperCase()}${unmappedFlag}</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                            <span class="loc-title">${(mapping[locId] || locId).toUpperCase()}</span>
                             <span style="font-size:9px; color:#554400; border:1px solid #332200; padding:1px 4px;">${locSystem.toUpperCase()}</span>
                         </div>
                         ${rows}
@@ -179,7 +157,6 @@
                 }
             }
         }
-
         init();
     </script>
 </body>
