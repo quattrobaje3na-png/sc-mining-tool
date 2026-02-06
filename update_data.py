@@ -5,17 +5,17 @@ import os
 URL = "https://api.regolith.rocks"
 TOKEN = os.environ.get("REGOLITH_TOKEN")
 
-# Target Signatures
 VERIFIED_SIGS = {
     "ITYPE": 4000, "CTYPE": 4700, "STYPE": 4720, 
     "PTYPE": 4750, "MTYPE": 4850, "QTYPE": 4870, "ETYPE": 4900
 }
 
-# The query now only requests 'data' as a scalar to avoid subfield errors
+# We'll try 'name' and 'id' since 'dataName' was rejected
 QUERY = """
 query {
   scoutingFind {
-    dataName
+    name
+    id
     data
   }
 }
@@ -29,29 +29,35 @@ def sync():
     headers = {"x-api-key": TOKEN.strip(), "Content-Type": "application/json"}
     
     try:
-        print("Contacting Regolith API...")
+        print("Contacting Regolith API (Discovery Mode)...")
         response = requests.post(URL, headers=headers, json={"query": QUERY}, timeout=20)
         result = response.json()
 
         if "errors" in result:
             print(f"API ERROR: {result['errors'][0]['message']}")
+            print("Initiating Field Discovery...")
+            # If the query failed, ask the API what fields ScoutingFind actually has
+            discovery = "{ __type(name: \"ScoutingFind\") { fields { name } } }"
+            disc_resp = requests.post(URL, headers=headers, json={"query": discovery})
+            fields = [f['name'] for f in disc_resp.json().get('data', {}).get('__type', {}).get('fields', [])]
+            print(f"AVAILABLE FIELDS ON ScoutingFind: {', '.join(fields)}")
             return
 
         raw_entries = result.get("data", {}).get("scoutingFind", [])
         if not raw_entries:
-            print("!! FAIL: scoutingFind returned no data !!")
+            print("!! FAIL: No data entries found !!")
             return
 
-        print(f"SUCCESS: Received {len(raw_entries)} entries. Processing JSON blobs...")
+        print(f"SUCCESS: Found {len(raw_entries)} entries. Processing...")
 
         ore_data = {}
         rock_data = {}
 
         for entry in raw_entries:
-            loc_name = entry.get("dataName", "UNKNOWN")
+            # Determine the location name from available fields
+            loc_name = entry.get("name") or entry.get("id") or "UNKNOWN"
             content = entry.get("data", {})
             
-            # Python handles the JSON unpacking here since GraphQL won't
             if isinstance(content, str):
                 try: content = json.loads(content)
                 except: content = {}
@@ -74,12 +80,9 @@ def sync():
                 }
             }
 
-        with open("ore_locations.json", "w") as f:
-            json.dump(ore_data, f, indent=2)
-        with open("rock.json", "w") as f:
-            json.dump(rock_data, f, indent=2)
-
-        print(f"Verification: Successfully updated {len(ore_data)} locations.")
+        with open("ore_locations.json", "w") as f: json.dump(ore_data, f, indent=2)
+        with open("rock.json", "w") as f: json.dump(rock_data, f, indent=2)
+        print(f"Verification: Updated {len(ore_data)} locations.")
 
     except Exception as e:
         print(f"!! CRITICAL ERROR: {str(e)} !!")
