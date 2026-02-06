@@ -2,56 +2,64 @@ import requests
 import json
 import os
 
-# 1. Verification of Environment
 URL = "https://api.regolith.rocks"
 TOKEN = os.environ.get("REGOLITH_TOKEN")
 
-def sync():
-    # We create the files early to prove the bot can write to the repo
-    print("Pre-seeding files to test write permissions...")
-    with open("ore_locations.json", "w") as f: json.dump({"status": "writing_started"}, f)
-    with open("rock.json", "w") as f: json.dump({"status": "writing_started"}, f)
+# We'll try both common naming conventions for the Regolith API
+QUERIES = [
+    "query { surveyLocations { id rockTypes { type prob } ores { name prob } } }",
+    "query { locations { id rockTypes { type prob } ores { name prob } } }"
+]
 
+def sync():
     if not TOKEN:
-        print("!! FAIL: REGOLITH_TOKEN is not set in GitHub Secrets !!")
+        print("!! FAIL: REGOLITH_TOKEN secret is missing !!")
         return
 
     headers = {"x-api-key": TOKEN, "Content-Type": "application/json"}
-    query = "query { surveyLocations { id rockTypes { type prob } ores { name prob } } }"
     
-    try:
-        print("Contacting Regolith API...")
-        response = requests.post(URL, headers=headers, json={"query": query}, timeout=20)
-        response.raise_for_status()
-        data = response.json()
-        
-        raw_locs = data.get("data", {}).get("surveyLocations", [])
-        if not raw_locs:
-            print("!! FAIL: API returned no data. Check if your API Key is active !!")
-            return
+    for query in QUERIES:
+        try:
+            print(f"Attempting query: {query[:50]}...")
+            response = requests.post(URL, headers=headers, json={"query": query}, timeout=20)
+            
+            # Print the raw response for debugging if it's not a 200 OK
+            if response.status_code != 200:
+                print(f"Status {response.status_code}: {response.text[:100]}")
+                continue
 
-        # STAGE 1: ORES
-        ores = {l["id"]: {"ores": {o["name"].capitalize(): o["prob"] for o in l.get("ores", [])}} for l in raw_locs}
-        with open("ore_locations.json", "w") as f:
-            json.dump(ores, f, indent=2)
+            data = response.json()
+            
+            # Look for data in either potential field
+            raw_locs = data.get("data", {}).get("surveyLocations") or data.get("data", {}).get("locations")
+            
+            if raw_locs:
+                print(f"SUCCESS: Found {len(raw_locs)} locations!")
+                
+                # STAGE 1: ORES
+                ores = {l["id"]: {"ores": {o["name"].capitalize(): o["prob"] for o in l.get("ores", [])}} for l in raw_locs}
+                with open("ore_locations.json", "w") as f:
+                    json.dump(ores, f, indent=2)
 
-        # STAGE 2: ROCKS
-        rocks = {}
-        for l in raw_locs:
-            is_planet = not any(k in l["id"].upper() for k in ['HALO', 'BELT', 'L1', 'L2', 'L3', 'L4', 'L5'])
-            rocks[l["id"]] = {
-                "is_planetary": is_planet,
-                "signatures": {"GROUND": 4000, "HAND": 3000} if is_planet else {
-                    rt["type"].upper(): {"prob": rt["prob"]} for rt in l.get("rockTypes", [])
-                }
-            }
-        with open("rock.json", "w") as f:
-            json.dump(rocks, f, indent=2)
+                # STAGE 2: ROCKS (Simplified logic for now to ensure it writes)
+                rocks = {}
+                for l in raw_locs:
+                    is_planet = not any(k in l["id"].upper() for k in ['HALO', 'BELT', 'L1', 'L2', 'L3', 'L4', 'L5'])
+                    rocks[l["id"]] = {
+                        "is_planetary": is_planet,
+                        "signatures": {"GROUND": 4000, "HAND": 3000} if is_planet else {
+                            rt["type"].upper(): 4870 for rt in l.get("rockTypes", []) # Defaulting sigs for test
+                        }
+                    }
+                with open("rock.json", "w") as f:
+                    json.dump(rocks, f, indent=2)
+                
+                return # Exit once we have success
 
-        print(f"SUCCESS: Captured {len(raw_locs)} locations.")
+        except Exception as e:
+            print(f"Query attempt failed: {str(e)}")
 
-    except Exception as e:
-        print(f"!! CRITICAL ERROR: {str(e)} !!")
+    print("!! ALL ATTEMPTS FAILED: Check your API Key in GitHub Secrets !!")
 
 if __name__ == "__main__":
     sync()
