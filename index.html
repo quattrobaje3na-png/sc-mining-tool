@@ -30,10 +30,10 @@
 <body>
     <div class="header">
         <div id="data-status" class="status-pill backup">INITIATING_SYSTEM...</div>
-        <h2 style="margin:0;">> MINING_INTEL_v45.3</h2>
+        <h2 style="margin:0;">> MINING_INTEL_v45.4</h2>
     </div>
 
-    <label>Target_Star_System</label>
+    <label>Target_System</label>
     <select id="sys-select">
         <option value="ALL">ALL_KNOWN_SYSTEMS</option>
         <option value="Stanton">STANTON</option>
@@ -42,13 +42,13 @@
     </select>
 
     <label>Material_Priority 01</label>
-    <select class="ore-sel"></select>
+    <select class="ore-sel" id="ore1"></select>
 
     <label>Material_Priority 02</label>
-    <select class="ore-sel"></select>
+    <select class="ore-sel" id="ore2"></select>
 
     <label>Material_Priority 03</label>
-    <select class="ore-sel"></select>
+    <select class="ore-sel" id="ore3"></select>
 
     <button onclick="scan()">Initiate Deep Scan</button>
 
@@ -56,15 +56,8 @@
     <div id="debug-log"></div>
 
     <script>
-        let oreData;
+        let oreData, filterData, sortingData;
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
-        const MATERIALS = [
-            "Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", 
-            "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", 
-            "Laranite", "Lindinium", "Quantainium", "Quartz", "Riccite", 
-            "Savrilium", "Silicon", "Stileron", "Taranite", "Tin", "Titanium", 
-            "Torite", "Tungsten"
-        ];
 
         function log(msg) {
             const d = document.getElementById('debug-log');
@@ -73,62 +66,69 @@
         }
 
         async function init() {
-            // Populate dropdowns with all materials
-            document.querySelectorAll('.ore-sel').forEach(s => {
-                s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
-                    MATERIALS.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
-            });
-
             const status = document.getElementById('data-status');
             
             try {
+                // 1. Load Filter and Sorting first
+                log("Loading configuration files...");
+                const [fRes, sRes] = await Promise.all([
+                    fetch(BASE_URL + 'filter.json'),
+                    fetch(BASE_URL + 'system_sorting.json')
+                ]);
+                
+                filterData = await fRes.json();
+                sortingData = await sRes.json();
+
+                // 2. Populate Dropdowns using filter.json
+                const materials = filterData.materials || [];
+                document.querySelectorAll('.ore-sel').forEach(s => {
+                    s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
+                        materials.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
+                });
+
+                // 3. Load Ore Data (Live First)
                 log("Checking for Live Sync Data...");
                 let res = await fetch(BASE_URL + 'ore_locations_live.json', {cache: "no-store"});
                 if (!res.ok) throw new Error();
                 oreData = await res.json();
                 status.className = "status-pill live";
                 status.innerText = "DB: LIVE_ACTIVE";
-                log(`Success! Loaded ${Object.keys(oreData).length} locations from live sync.`);
+                log(`Success! Loaded ${Object.keys(oreData).length} locations.`);
             } catch (e) {
-                log("Live sync unavailable, checking Master database...");
+                log("Live path failed or config missing, attempting Master fallback...");
                 try {
                     let res = await fetch(BASE_URL + 'ore_locations.json');
                     oreData = await res.json();
                     status.className = "status-pill backup";
                     status.innerText = "DB: MASTER_FALLBACK";
-                    log(`Loaded ${Object.keys(oreData).length} master locations.`);
+                    log("Using master verified database.");
                 } catch (err) {
-                    log("CRITICAL ERROR: Failed to initialize mining database.");
+                    log("CRITICAL ERROR: Failed to load any database.");
                 }
             }
         }
 
         function scan() {
             const out = document.getElementById('results');
-            const system = document.getElementById('sys-select').value;
+            const selectedSys = document.getElementById('sys-select').value;
             const picks = Array.from(document.querySelectorAll('.ore-sel')).map(s => s.value).filter(v => v);
             
             out.innerHTML = "";
-            if (!oreData) { log("Scan aborted: Database not ready."); return; }
+            if (!oreData || !sortingData) { log("Scan aborted: Config files not ready."); return; }
 
             let found = 0;
             for (let loc in oreData) {
-                // Detect system from location name
-                const locName = loc.toUpperCase();
-                const isPyro = locName.includes('PYRO') || locName.includes('RAB') || locName.includes('RMB');
-                const isNyx = locName.includes('NYX') || locName.includes('GLACIUM');
-                const currentLocSys = isPyro ? 'Pyro' : (isNyx ? 'Nyx' : 'Stanton');
+                // Get system from system_sorting.json
+                const locSystem = sortingData[loc] || "Stanton";
 
-                if (system !== "ALL" && system !== currentLocSys) continue;
+                if (selectedSys !== "ALL" && selectedSys !== locSystem) continue;
 
                 let matches = [];
                 picks.forEach(p => {
                     const ores = oreData[loc].ores || {};
-                    // Case-insensitive lookup for material
-                    const key = Object.keys(ores).find(k => k.toLowerCase() === p.toLowerCase());
-                    if (key) {
-                        const prob = ores[key];
-                        matches.push({ name: key.toUpperCase(), prob: (prob * 100).toFixed(1) });
+                    // Match key from JSON
+                    if (ores[p]) {
+                        matches.push({ name: p.toUpperCase(), prob: (ores[p] * 100).toFixed(1) });
                     }
                 });
 
@@ -137,12 +137,12 @@
                     const card = document.createElement('div');
                     card.className = "card";
                     let rows = matches.map(m => `<div class="row"><span>${m.name}</span><span class="prob">${m.prob}%</span></div>`).join('');
-                    card.innerHTML = `<span class="loc-title">${loc.toUpperCase()} [${currentLocSys.toUpperCase()}]</span>${rows}`;
+                    card.innerHTML = `<span class="loc-title">${loc.toUpperCase()} [${locSystem.toUpperCase()}]</span>${rows}`;
                     out.appendChild(card);
                 }
             }
 
-            if (found === 0) out.innerHTML = "<p style='color:#666; text-align:center;'>NO RESOURCE SIGNATURES DETECTED</p>";
+            if (found === 0) out.innerHTML = "<p style='color:#666; text-align:center;'>NO MINERAL SIGNATURES DETECTED</p>";
         }
 
         init();
