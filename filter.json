@@ -1,1 +1,5 @@
-filter.json
+{
+  "blacklisted_ids": [
+    "KKE-717"
+  ]
+}
