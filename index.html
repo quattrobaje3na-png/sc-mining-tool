@@ -24,8 +24,8 @@
 <body>
     <div class="header">
         <div id="data-status">DATABASE: AUTO_SYNC_ACTIVE</div>
-        <h3>> INTEL_v37.2_FINAL_FIX</h3>
-        <p style="font-size:12px; color:#666;">COMMUNITY SURVEY DATA UPDATED DAILY</p>
+        <h3>> INTEL_v37.3_TRIPLE_SYNC</h3>
+        <p style="font-size:12px; color:#666;">COMMUNITY SURVEY DATA UPDATED DAILY VIA GITHUB ACTIONS</p>
     </div>
 
     <label>Region_Selection</label>
@@ -42,6 +42,7 @@
         <option value="Savrilium">SAVRILIUM</option>
         <option value="Bexalite">BEXALITE</option>
         <option value="Taranite">TARANITE</option>
+        <option value="Lindinium">LINDINIUM</option>
         <option value="Laranite">LARANITE</option>
         <option value="Agricium">AGRICIUM</option>
         <option value="Hephaestanite">HEPHAESTANITE</option>
@@ -52,7 +53,61 @@
         <option value="Titanium">TITANIUM</option>
         <option value="Copper">COPPER</option>
         <option value="Quartz">QUARTZ</option>
+        <option value="Stileron">STILERON</option>
+        <option value="Silicon">SILICON</option>
         <option value="Aluminum">ALUMINUM</option>
+        <option value="Iron">IRON</option>
+        <option value="Ice">ICE</option>
+    </select>
+
+    <label>Priority_Resource_02</label>
+    <select class="ore-sel">
+        <option value="">- SELECT MATERIAL -</option>
+        <option value="Quantainium">QUANTAINIUM</option>
+        <option value="Savrilium">SAVRILIUM</option>
+        <option value="Bexalite">BEXALITE</option>
+        <option value="Taranite">TARANITE</option>
+        <option value="Lindinium">LINDINIUM</option>
+        <option value="Laranite">LARANITE</option>
+        <option value="Agricium">AGRICIUM</option>
+        <option value="Hephaestanite">HEPHAESTANITE</option>
+        <option value="Borase">BORASE</option>
+        <option value="Beryl">BERYL</option>
+        <option value="Gold">GOLD</option>
+        <option value="Tungsten">TUNGSTEN</option>
+        <option value="Titanium">TITANIUM</option>
+        <option value="Copper">COPPER</option>
+        <option value="Quartz">QUARTZ</option>
+        <option value="Stileron">STILERON</option>
+        <option value="Silicon">SILICON</option>
+        <option value="Aluminum">ALUMINUM</option>
+        <option value="Iron">IRON</option>
+        <option value="Ice">ICE</option>
+    </select>
+
+    <label>Priority_Resource_03</label>
+    <select class="ore-sel">
+        <option value="">- SELECT MATERIAL -</option>
+        <option value="Quantainium">QUANTAINIUM</option>
+        <option value="Savrilium">SAVRILIUM</option>
+        <option value="Bexalite">BEXALITE</option>
+        <option value="Taranite">TARANITE</option>
+        <option value="Lindinium">LINDINIUM</option>
+        <option value="Laranite">LARANITE</option>
+        <option value="Agricium">AGRICIUM</option>
+        <option value="Hephaestanite">HEPHAESTANITE</option>
+        <option value="Borase">BORASE</option>
+        <option value="Beryl">BERYL</option>
+        <option value="Gold">GOLD</option>
+        <option value="Tungsten">TUNGSTEN</option>
+        <option value="Titanium">TITANIUM</option>
+        <option value="Copper">COPPER</option>
+        <option value="Quartz">QUARTZ</option>
+        <option value="Stileron">STILERON</option>
+        <option value="Silicon">SILICON</option>
+        <option value="Aluminum">ALUMINUM</option>
+        <option value="Iron">IRON</option>
+        <option value="Ice">ICE</option>
     </select>
 
     <button onclick="scan()">Initiate Triple Scan</button>
@@ -70,9 +125,8 @@
                     fetch(BASE_URL + 'reference.json', {cache: "no-store"}).then(r => r.json())
                 ]);
                 [oreData, sysGroups, refMapping] = configs;
-                console.log("Data Loaded Successfully");
             } catch (err) {
-                console.error("Initialization failed:", err);
+                console.error("Link Failure", err);
             }
         }
 
@@ -84,22 +138,25 @@
             out.innerHTML = "";
             if (!oreData || !sysGroups) return;
 
-            const activeGroup = sysGroups.star_system_groups[system] || [];
+            const activeGroup = (sysGroups.star_system_groups[system] || []).map(id => id.replace(/[-_]/g, '').toUpperCase());
             const mapping = refMapping.location_mapping || {};
             const matches = [];
 
             for (let rawID in oreData) {
-                // Check if location belongs to selected system
-                const isCorrectSystem = activeGroup.some(gID => gID.replace(/[-_]/g, '').toUpperCase() === rawID.replace(/[-_]/g, '').toUpperCase());
-                if (!isCorrectSystem) continue;
+                // Surgical Stanton Cluster Filter
+                if (/^[A-Z]{3}-\d{3}$/.test(rawID)) continue;
+
+                // Normalize ID for matching
+                const normID = rawID.replace(/[-_]/g, '').toUpperCase();
+                if (!activeGroup.includes(normID)) continue;
 
                 let resultsForLoc = [];
                 let totalProb = 0;
                 const ores = oreData[rawID].ores || {};
 
                 picks.forEach(p => {
-                    // NEW: Case-insensitive search inside the ore keys
-                    let matchKey = Object.keys(ores).find(k => k.toUpperCase() === p || k.toUpperCase().includes(p.substring(0,5)));
+                    // Smart lookup to bridge spelling/case differences
+                    let matchKey = Object.keys(ores).find(k => k.toUpperCase().includes(p.substring(0,5)));
                     
                     if (matchKey) {
                         const prob = ores[matchKey].prob || 0;
@@ -125,6 +182,7 @@
                 });
             }
         }
+
         init();
     </script>
 </body>
