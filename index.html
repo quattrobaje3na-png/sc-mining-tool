@@ -21,8 +21,8 @@
 </head>
 <body>
     <div class="header">
-        <h3>> INTEL_v29.9.1_STRICT</h3>
-        <p id="status">ESTABLISHING DATA LINK...</p>
+        <h3>> INTEL_v29.9.3</h3>
+        <p id="status">INITIATING DATA SYNC...</p>
     </div>
 
     <label>Region_Selection</label>
@@ -77,7 +77,7 @@
         <option value="Ammonia">AMMONIA</option>
     </select>
 
-    <button onclick="scan()">Execute Strict Scan</button>
+    <button onclick="scan()">Execute Global Search</button>
     <div id="results"></div>
 
     <script>
@@ -85,17 +85,20 @@
         const statusText = document.getElementById('status');
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
 
+        const fetchWithErr = (name) => fetch(BASE_URL + name, {cache: "no-store"})
+            .then(r => { if(!r.ok) throw new Error(name); return r.json(); });
+
         Promise.all([
-            fetch(BASE_URL + 'OreLocations.json', {cache: "no-store"}).then(r => r.json()),
-            fetch(BASE_URL + 'system_sorting.json', {cache: "no-store"}).then(r => r.json()),
-            fetch(BASE_URL + 'reference.json', {cache: "no-store"}).then(r => r.json())
-        ]).then(responses => {
-            [oreData, sysGroups, refMapping] = responses;
-            statusText.innerText = "READY: STRICT SYNC COMPLETE";
+            fetchWithErr('OreLocations.json'),
+            fetchWithErr('system_sorting.json'),
+            fetchWithErr('reference.json')
+        ]).then(res => {
+            [oreData, sysGroups, refMapping] = res;
+            statusText.innerText = "READY: MULTI-STREAM SYNC COMPLETE";
+            statusText.style.color = "#00FF00";
         }).catch(err => {
-            statusText.innerText = "SYNC_ERROR: CHECK FILENAMES";
+            statusText.innerText = "SYNC_ERROR: UNABLE TO LOAD " + err.message.toUpperCase();
             statusText.style.color = "red";
-            console.error(err);
         });
 
         function scan() {
@@ -106,12 +109,9 @@
             out.innerHTML = "";
             if (!oreData || !sysGroups || !refMapping) return;
 
+            const matches = [];
             const activeGroup = sysGroups.star_system_groups[system] || [];
             const validLocations = refMapping.location_mapping || {};
-
-            console.log("Scanning System:", system, "Locations in group:", activeGroup.length);
-
-            const matches = [];
 
             for (let loc in oreData) {
                 if (!activeGroup.includes(loc)) continue;
@@ -137,7 +137,7 @@
             }
 
             if (matches.length === 0) {
-                out.innerHTML = "<p style='color:#665500;'>NO VERIFIED DATA FOUND FOR SELECTION</p>";
+                out.innerHTML = "<p style='color:#665500;'>NO VERIFIED DATA FOUND IN THIS REGION</p>";
             } else {
                 matches.sort((a, b) => b.sortVal - a.sortVal).forEach(m => {
                     const card = document.createElement('div');
