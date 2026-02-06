@@ -23,14 +23,12 @@
         .loc-title { color: #fff; font-size: 16px; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 8px; display: block; }
         .row { display: flex; justify-content: space-between; font-size: 14px; padding: 3px 0; }
         .prob { color: #00FF00; font-weight: bold; }
-
-        #debug-log { background: #110000; color: #ff5555; padding: 10px; font-size: 10px; border: 1px solid #440000; margin-top: 20px; max-height: 150px; overflow-y: auto; display: none; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div id="data-status" class="status-pill backup">INITIATING_SYSTEM...</div>
-        <h2 style="margin:0;">> MINING_INTEL_v45.5</h2>
+        <div id="data-status" class="status-pill backup">INTEL_OFFLINE</div>
+        <h2 style="margin:0;">> MINING_INTEL_v45.7</h2>
     </div>
 
     <label>Target_Star_System</label>
@@ -41,35 +39,26 @@
         <option value="Nyx">NYX</option>
     </select>
 
-    <label>Material_Priority_01</label>
+    <label>Priority_Material_01</label>
+    <select class="ore-sel"></select>
+    <label>Priority_Material_02</label>
+    <select class="ore-sel"></select>
+    <label>Priority_Material_03</label>
     <select class="ore-sel"></select>
 
-    <label>Material_Priority_02</label>
-    <select class="ore-sel"></select>
-
-    <label>Material_Priority_03</label>
-    <select class="ore-sel"></select>
-
-    <button onclick="scan()">Initiate Deep Scan</button>
-
+    <button id="scan-btn" onclick="scan()" disabled>Waiting for Data...</button>
     <div id="results"></div>
-    <div id="debug-log"></div>
 
     <script>
         let oreData, filterData, sortingData;
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
 
-        function log(msg) {
-            const d = document.getElementById('debug-log');
-            d.style.display = 'block';
-            d.innerHTML += `> ${msg}<br>`;
-        }
-
         async function init() {
             const status = document.getElementById('data-status');
-            
+            const btn = document.getElementById('scan-btn');
+
             try {
-                log("Loading configuration: filter.json & system_sorting.json...");
+                // 1. Load configuration files first
                 const [fRes, sRes] = await Promise.all([
                     fetch(BASE_URL + 'filter.json'),
                     fetch(BASE_URL + 'system_sorting.json')
@@ -78,31 +67,35 @@
                 filterData = await fRes.json();
                 sortingData = await sRes.json();
 
-                // Populate all three Material priority dropdowns
+                // 2. Populate Dropdowns strictly from filter.json
                 const materials = filterData.materials || [];
                 document.querySelectorAll('.ore-sel').forEach(s => {
                     s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
                         materials.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
                 });
 
-                log("Checking for Live Sync Data...");
+                // 3. Load Ore Data (Live Priority)
                 let res = await fetch(BASE_URL + 'ore_locations_live.json', {cache: "no-store"});
                 if (!res.ok) throw new Error();
                 oreData = await res.json();
                 status.className = "status-pill live";
                 status.innerText = "DB: LIVE_ACTIVE";
-                log(`Success! Loaded ${Object.keys(oreData).length} locations from API.`);
             } catch (e) {
-                log("Live path failed, falling back to Master files...");
+                // 4. Fallback to Master
                 try {
                     let res = await fetch(BASE_URL + 'ore_locations.json');
                     oreData = await res.json();
                     status.className = "status-pill backup";
                     status.innerText = "DB: MASTER_FALLBACK";
-                    log("Verified master database loaded.");
                 } catch (err) {
-                    log("CRITICAL ERROR: Failed to load any mining database.");
+                    status.innerText = "DB: CRITICAL_FAILURE";
                 }
+            }
+            
+            // Enable button once data is confirmed
+            if (oreData) {
+                btn.disabled = false;
+                btn.innerText = "Initiate Deep Scan";
             }
         }
 
@@ -112,12 +105,11 @@
             const picks = Array.from(document.querySelectorAll('.ore-sel')).map(s => s.value).filter(v => v);
             
             out.innerHTML = "";
-            if (!oreData || !sortingData) { log("Scan aborted: Files missing."); return; }
+            if (!oreData || !sortingData) return;
 
-            let found = 0;
             for (let loc in oreData) {
-                // Mapping system groups from system_sorting.json
-                let locSystem = "Stanton"; 
+                let locSystem = "Stanton";
+                // Look up location in system_sorting groups
                 if (sortingData.star_system_groups) {
                     for (let sys in sortingData.star_system_groups) {
                         if (sortingData.star_system_groups[sys].includes(loc)) {
@@ -138,7 +130,6 @@
                 });
 
                 if (matches.length > 0) {
-                    found++;
                     const card = document.createElement('div');
                     card.className = "card";
                     let rows = matches.map(m => `<div class="row"><span>${m.name}</span><span class="prob">${m.prob}%</span></div>`).join('');
@@ -146,11 +137,9 @@
                     out.appendChild(card);
                 }
             }
-
-            if (found === 0) out.innerHTML = "<p style='color:#666; text-align:center;'>NO MINERAL SIGNATURES DETECTED</p>";
         }
 
-            init();
+        init();
     </script>
 </body>
 </html>
