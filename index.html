@@ -21,7 +21,7 @@
 </head>
 <body>
     <div class="header">
-        <h3>> INTEL_v29.8_STRICT_REF</h3>
+        <h3>> INTEL_v29.9.1_STRICT</h3>
         <p id="status">ESTABLISHING DATA LINK...</p>
     </div>
 
@@ -87,14 +87,15 @@
 
         Promise.all([
             fetch(BASE_URL + 'OreLocations.json', {cache: "no-store"}).then(r => r.json()),
-            fetch(BASE_URL + 'system%20sorting.json', {cache: "no-store"}).then(r => r.json()),
+            fetch(BASE_URL + 'system_sorting.json', {cache: "no-store"}).then(r => r.json()),
             fetch(BASE_URL + 'reference.json', {cache: "no-store"}).then(r => r.json())
         ]).then(responses => {
             [oreData, sysGroups, refMapping] = responses;
             statusText.innerText = "READY: STRICT SYNC COMPLETE";
         }).catch(err => {
-            statusText.innerText = "SYNC_ERROR";
+            statusText.innerText = "SYNC_ERROR: CHECK FILENAMES";
             statusText.style.color = "red";
+            console.error(err);
         });
 
         function scan() {
@@ -105,15 +106,15 @@
             out.innerHTML = "";
             if (!oreData || !sysGroups || !refMapping) return;
 
-            const matches = [];
             const activeGroup = sysGroups.star_system_groups[system] || [];
             const validLocations = refMapping.location_mapping || {};
 
-            for (let loc in oreData) {
-                // RULE 1: Must be in the selected Star System
-                if (!activeGroup.includes(loc)) continue;
+            console.log("Scanning System:", system, "Locations in group:", activeGroup.length);
 
-                // RULE 2: Must exist in reference.json (Exclude unmapped codes)
+            const matches = [];
+
+            for (let loc in oreData) {
+                if (!activeGroup.includes(loc)) continue;
                 if (!validLocations[loc]) continue;
 
                 let foundOres = [];
@@ -131,8 +132,7 @@
                 });
 
                 if (foundOres.length > 0) {
-                    const friendlyName = validLocations[loc];
-                    matches.push({ name: friendlyName, ores: foundOres, sortVal: maxProb });
+                    matches.push({ name: validLocations[loc], ores: foundOres, sortVal: maxProb });
                 }
             }
 
