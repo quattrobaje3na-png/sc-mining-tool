@@ -5,67 +5,76 @@ import os
 URL = "https://api.regolith.rocks"
 TOKEN = os.environ.get("REGOLITH_TOKEN")
 
-# TARGET QUERY: Switched to 'locationId' based on typical GraphQL naming
+# SIGNATURE DEFAULTS
+VERIFIED_SIGS = {
+    "ITYPE": 4000, "CTYPE": 4700, "STYPE": 4720, 
+    "PTYPE": 4750, "MTYPE": 4850, "QTYPE": 4870, "ETYPE": 4900
+}
+
+# NEW QUERY: Mapping to the discovered fields 'dataName' and 'data'
 QUERY = """
 query {
   surveyData {
-    locationId
-    rockTypes { type prob }
-    ores { name prob }
+    dataName
+    data {
+      rockTypes { type prob }
+      ores { name prob }
+    }
   }
 }
 """
 
 def sync():
     if not TOKEN:
-        print("!! FAIL: REGOLITH_TOKEN secret missing !!")
+        print("!! FAIL: REGOLITH_TOKEN missing !!")
         return
 
     headers = {"x-api-key": TOKEN.strip(), "Content-Type": "application/json"}
     
     try:
-        print("Contacting Regolith API (Attempting locationId)...")
+        print("Contacting Regolith API (Targeting dataName path)...")
         response = requests.post(URL, headers=headers, json={"query": QUERY}, timeout=20)
         data = response.json()
 
         if "errors" in data:
-            error_msg = data['errors'][0]['message']
-            print(f"SCHEMA ERROR: {error_msg}")
-            
-            # AUTO-DISCOVERY: If the query fails, ask the API what fields IT has
-            print("Initiating Auto-Discovery of surveyData fields...")
-            schema_query = "{ __type(name: \"SurveyData\") { fields { name } } }"
-            schema_resp = requests.post(URL, headers=headers, json={"query": schema_query})
-            schema_data = schema_resp.json()
-            fields = [f['name'] for f in schema_data.get('data', {}).get('__type', {}).get('fields', [])]
-            print(f"AVAILABLE FIELDS ON SurveyData: {', '.join(fields)}")
+            print(f"API ERROR: {data['errors'][0]['message']}")
             return
 
-        raw_locs = data.get("data", {}).get("surveyData", [])
-        if not raw_locs:
-            print("!! FAIL: surveyData returned empty !!")
+        raw_entries = data.get("data", {}).get("surveyData", [])
+        if not raw_entries:
+            print("!! FAIL: No survey data found !!")
             return
 
-        print(f"SUCCESS: Captured {len(raw_locs)} locations!")
+        print(f"SUCCESS: Found {len(raw_entries)} data points. Mapping to repository...")
 
-        # Process and save (using locationId as the key)
         ore_data = {}
         rock_data = {}
-        for l in raw_locs:
-            lid = l.get("locationId", "UNKNOWN")
-            ore_data[lid] = {"ores": {o["name"].capitalize(): o["prob"] for o in l.get("ores", [])}}
+
+        for entry in raw_entries:
+            name = entry.get("dataName", "UNKNOWN")
+            inner_data = entry.get("data", {})
             
-            is_p = not any(k in lid.upper() for k in ['HALO', 'BELT', 'L1', 'L2', 'L3', 'L4', 'L5'])
-            rock_data[lid] = {
-                "is_planetary": is_p,
-                "signatures": {"GROUND": 4000, "HAND": 3000} if is_p else {
-                    rt["type"].upper(): 4870 for rt in l.get("rockTypes", [])
+            # 1. Process Ores
+            ore_data[name] = {
+                "ores": {o["name"].capitalize(): o["prob"] for o in inner_data.get("ores", [])}
+            }
+
+            # 2. Process Rock Signatures
+            is_planet = not any(k in name.upper() for k in ['HALO', 'BELT', 'L1', 'L2', 'L3', 'L4', 'L5'])
+            rock_data[name] = {
+                "is_planetary": is_planet,
+                "signatures": {"GROUND": 4000, "HAND": 3000} if is_planet else {
+                    rt["type"].upper(): VERIFIED_SIGS.get(rt["type"].upper() + "TYPE", 4870)
+                    for rt in inner_data.get("rockTypes", [])
                 }
             }
 
-        with open("ore_locations.json", "w") as f: json.dump(ore_data, f, indent=2)
-        with open("rock.json", "w") as f: json.dump(rock_data, f, indent=2)
-        print("Verification: Both files written successfully.")
+        with open("ore_locations.json", "w") as f:
+            json.dump(ore_data, f, indent=2)
+        with open("rock.json", "w") as f:
+            json.dump(rock_data, f, indent=2)
+
+        print("Verification: Data successfully mapped from dataName to JSON files.")
 
     except Exception as e:
         print(f"!! CRITICAL ERROR: {str(e)} !!")
