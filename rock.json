@@ -1,51 +1,51 @@
 {
   "asteroids": {
     "Stanton": {
-      "C-Type": { "sig": 1700, "mass_med": 5300, "instability_med": 26, "resistance_med": 6 },
-      "E-Type": { "sig": 1900, "mass_med": 6700, "instability_med": 33, "resistance_med": 22 },
-      "M-Type": { "sig": 1850, "mass_med": 10000, "instability_med": 43, "resistance_med": 21 },
-      "P-Type": { "sig": 1750, "mass_med": 8800, "instability_med": 41, "resistance_med": 21 },
-      "Q-Type": { "sig": 1870, "mass_med": 10000, "instability_med": 31, "resistance_med": 17 },
-      "S-Type": { "sig": 1720, "mass_med": 5300, "instability_med": 27, "resistance_med": 22 }
+      "C-Type": { "sig": 4700, "mass_med": 5300, "instability_med": 26, "resistance_med": 6 },
+      "E-Type": { "sig": 4900, "mass_med": 6700, "instability_med": 33, "resistance_med": 22 },
+      "M-Type": { "sig": 4850, "mass_med": 10000, "instability_med": 43, "resistance_med": 21 },
+      "P-Type": { "sig": 4750, "mass_med": 8800, "instability_med": 41, "resistance_med": 21 },
+      "Q-Type": { "sig": 4870, "mass_med": 10000, "instability_med": 31, "resistance_med": 17 },
+      "S-Type": { "sig": 4720, "mass_med": 5300, "instability_med": 27, "resistance_med": 22 }
     },
     "Pyro": {
-      "C-Type": { "sig": 1700, "mass_med": 5400, "instability_med": 32, "resistance_med": 8 },
-      "E-Type": { "sig": 1900, "mass_med": 6900, "instability_med": 32, "resistance_med": 23 },
-      "I-Type": { "sig": 1660, "mass_med": 3500, "instability_med": 33, "resistance_med": 9 },
-      "M-Type": { "sig": 1850, "mass_med": 10000, "instability_med": 44, "resistance_med": 23 },
-      "P-Type": { "sig": 1750, "mass_med": 5400, "instability_med": 26, "resistance_med": 22 },
-      "Q-Type": { "sig": 1870, "mass_med": 10000, "instability_med": 34, "resistance_med": 20 },
-      "S-Type": { "sig": 1720, "mass_med": 5300, "instability_med": 27, "resistance_med": 26 }
+      "C-Type": { "sig": 4700, "mass_med": 5400, "instability_med": 32, "resistance_med": 8 },
+      "E-Type": { "sig": 4900, "mass_med": 6900, "instability_med": 32, "resistance_med": 23 },
+      "I-Type": { "sig": 4000, "mass_med": 3500, "instability_med": 33, "resistance_med": 9 },
+      "M-Type": { "sig": 4850, "mass_med": 10000, "instability_med": 44, "resistance_med": 23 },
+      "P-Type": { "sig": 4750, "mass_med": 5400, "instability_med": 26, "resistance_med": 22 },
+      "Q-Type": { "sig": 4870, "mass_med": 10000, "instability_med": 34, "resistance_med": 20 },
+      "S-Type": { "sig": 4720, "mass_med": 5300, "instability_med": 27, "resistance_med": 26 }
     },
     "Nyx": {
-      "C-Type": { "sig": 1700, "mass_med": 4000, "instability_med": 36, "resistance_med": 9 },
-      "E-Type": { "sig": 1900, "mass_med": 4300, "instability_med": 32, "resistance_med": 18 },
-      "M-Type": { "sig": 1850, "mass_med": 6500, "instability_med": 119, "resistance_med": 39 },
-      "P-Type": { "sig": 1750, "mass_med": 5200, "instability_med": 30, "resistance_med": 14 },
-      "Q-Type": { "sig": 1870, "mass_med": 6700, "instability_med": 31, "resistance_med": 12 },
-      "S-Type": { "sig": 1720, "mass_med": 4100, "instability_med": 38, "resistance_med": 20 }
+      "C-Type": { "sig": 4700, "mass_med": 4000, "instability_med": 36, "resistance_med": 9 },
+      "E-Type": { "sig": 4900, "mass_med": 4300, "instability_med": 32, "resistance_med": 18 },
+      "M-Type": { "sig": 4850, "mass_med": 6500, "instability_med": 119, "resistance_med": 39 },
+      "P-Type": { "sig": 4750, "mass_med": 5200, "instability_med": 30, "resistance_med": 14 },
+      "Q-Type": { "sig": 4870, "mass_med": 6700, "instability_med": 31, "resistance_med": 12 },
+      "S-Type": { "sig": 4720, "mass_med": 4100, "instability_med": 38, "resistance_med": 20 }
     }
   },
   "surface_deposits": {
     "Stanton": {
-      "Atacamite": { "sig": 1800, "mass_med": 9100, "instability_med": 42, "resistance_med": 15 },
-      "Felsic": { "sig": 1770, "mass_med": 2400, "instability_med": 14, "resistance_med": 25 },
-      "Gneiss": { "sig": 1840, "mass_med": 2400, "instability_med": 17, "resistance_med": 8 },
-      "Granite": { "sig": 1920, "mass_med": 9300, "instability_med": 16, "resistance_med": 16 },
-      "Igneous": { "sig": 1950, "mass_med": 12000, "instability_med": 49, "resistance_med": 21 },
-      "Obsidian": { "sig": 1790, "mass_med": 4900, "instability_med": 20, "resistance_med": 20 },
-      "Quartzite": { "sig": 1820, "mass_med": 3900, "instability_med": 25, "resistance_med": 8 },
-      "Shale": { "sig": 1730, "mass_med": 6700, "instability_med": 32, "resistance_med": 21 }
+      "Atacamite": { "sig": 4000, "mass_med": 9100, "instability_med": 42, "resistance_med": 15 },
+      "Felsic": { "sig": 4000, "mass_med": 2400, "instability_med": 14, "resistance_med": 25 },
+      "Gneiss": { "sig": 4000, "mass_med": 2400, "instability_med": 17, "resistance_med": 8 },
+      "Granite": { "sig": 4000, "mass_med": 9300, "instability_med": 16, "resistance_med": 16 },
+      "Igneous": { "sig": 4000, "mass_med": 12000, "instability_med": 49, "resistance_med": 21 },
+      "Obsidian": { "sig": 4000, "mass_med": 4900, "instability_med": 20, "resistance_med": 20 },
+      "Quartzite": { "sig": 4000, "mass_med": 3900, "instability_med": 25, "resistance_med": 8 },
+      "Shale": { "sig": 4000, "mass_med": 6700, "instability_med": 32, "resistance_med": 21 }
     },
     "Pyro": {
-      "Atacamite": { "sig": 1800, "mass_med": 8500, "instability_med": 44, "resistance_med": 18 },
-      "Felsic": { "sig": 1770, "mass_med": 2200, "instability_med": 14, "resistance_med": 30 },
-      "Gneiss": { "sig": 1840, "mass_med": 2300, "instability_med": 17, "resistance_med": 7 },
-      "Granite": { "sig": 1920, "mass_med": 8800, "instability_med": 15, "resistance_med": 19 },
-      "Igneous": { "sig": 1950, "mass_med": 12000, "instability_med": 52, "resistance_med": 23 },
-      "Obsidian": { "sig": 1790, "mass_med": 5300, "instability_med": 17, "resistance_med": 22 },
-      "Quartzite": { "sig": 1820, "mass_med": 5100, "instability_med": 32, "resistance_med": 12 },
-      "Shale": { "sig": 1730, "mass_med": 6500, "instability_med": 28, "resistance_med": 25 }
+      "Atacamite": { "sig": 4000, "mass_med": 8500, "instability_med": 44, "resistance_med": 18 },
+      "Felsic": { "sig": 4000, "mass_med": 2200, "instability_med": 14, "resistance_med": 30 },
+      "Gneiss": { "sig": 4000, "mass_med": 2300, "instability_med": 17, "resistance_med": 7 },
+      "Granite": { "sig": 4000, "mass_med": 8800, "instability_med": 15, "resistance_med": 19 },
+      "Igneous": { "sig": 4000, "mass_med": 12000, "instability_med": 52, "resistance_med": 23 },
+      "Obsidian": { "sig": 4000, "mass_med": 5300, "instability_med": 17, "resistance_med": 22 },
+      "Quartzite": { "sig": 4000, "mass_med": 5100, "instability_med": 32, "resistance_med": 12 },
+      "Shale": { "sig": 4000, "mass_med": 6500, "instability_med": 28, "resistance_med": 25 }
     }
   }
 }
