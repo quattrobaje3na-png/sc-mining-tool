@@ -1,197 +1,54 @@
-"Stanton": {
-        "C-Type": {
-            "sig": 1700,
-            "probabilities": {
-                "Quantanium": 0.03,
-                "Bexalite": 0.18,
-                "Taranite": 0.17,
-                "Gold": 0.08,
-                "Hephaestanite": 0.43,
-                "Tungsten": 0.23,
-                "Titanium": 0.15,
-                "Iron": 0.1,
-                "Quartz": 0.12,
-                "Corundum": 0.15,
-                "Copper": 0.13,
-                "Aluminum": 0.14
-            }
-        },
-        "E-Type": {
-            "sig": 1900,
-            "probabilities": {
-                "Quantanium": 0.05,
-                "Bexalite": 0.12,
-                "Taranite": 0.11,
-                "Gold": 0.29,
-                "Beryl": 0.39,
-                "Tungsten": 0.22,
-                "Titanium": 0.11,
-                "Iron": 0.11,
-                "Quartz": 0.12,
-                "Corundum": 0.14,
-                "Copper": 0.12,
-                "Aluminum": 0.19
-            }
-        },
-        "M-Type": {
-            "sig": 1850,
-            "probabilities": {
-                "Quantanium": 0.02,
-                "Bexalite": 0.03,
-                "Taranite": 0.05,
-                "Gold": 0.25,
-                "Agricium": 0.57,
-                "Tungsten": 0.11,
-                "Titanium": 0.15,
-                "Iron": 0.15,
-                "Quartz": 0.11,
-                "Corundum": 0.22,
-                "Copper": 0.11,
-                "Aluminum": 0.16
-            }
-        },
-        "P-Type": {
-            "sig": 1750,
-            "probabilities": {
-                "Quantanium": 0.02,
-                "Bexalite": 0.2,
-                "Taranite": 0.22,
-                "Gold": 0.06,
-                "Laranite": 0.47,
-                "Tungsten": 0.14,
-                "Titanium": 0.13,
-                "Iron": 0.12,
-                "Quartz": 0.08,
-                "Corundum": 0.18,
-                "Copper": 0.16,
-                "Aluminum": 0.2
-            }
-        },
-        "Q-Type": {
-            "sig": 1870,
-            "probabilities": {
-                "Quantanium": 0.04,
-                "Bexalite": 0.13,
-                "Taranite": 0.1,
-                "Gold": 0.12,
-                "Borase": 0.27,
-                "Laranite": 0.28,
-                "Tungsten": 0.15,
-                "Titanium": 0.14,
-                "Iron": 0.12,
-                "Quartz": 0.16,
-                "Corundum": 0.16,
-                "Copper": 0.16,
-                "Aluminum": 0.14
-            }
-        },
-        "S-Type": {
-            "sig": 1720,
-            "probabilities": {
-                "Quantanium": 0.02,
-                "Bexalite": 0.13,
-                "Taranite": 0.16,
-                "Gold": 0.06,
-                "Laranite": 0.23,
-                "Beryl": 0.38,
-                "Tungsten": 0.15,
-                "Titanium": 0.16,
-                "Iron": 0.19,
-                "Quartz": 0.13,
-                "Corundum": 0.08,
-                "Copper": 0.09,
-                "Aluminum": 0.21
-            }
-        },
-        "I-Type": {
-            "sig": 1660,
-            "probabilities": {}
-        }
+{
+  "Stanton": {
+    "asteroid_types": {
+      "C-Type": { "sig": 4700, "probabilities": { "Quantanium": 0.03, "Bexalite": 0.18, "Taranite": 0.17, "Gold": 0.08, "Hephaestanite": 0.43, "Tungsten": 0.23, "Titanium": 0.15, "Iron": 0.10, "Quartz": 0.12, "Corundum": 0.15, "Copper": 0.13, "Aluminum": 0.14 } },
+      "E-Type": { "sig": 4900, "probabilities": { "Quantanium": 0.05, "Bexalite": 0.12, "Taranite": 0.11, "Gold": 0.29, "Beryl": 0.39, "Tungsten": 0.22, "Titanium": 0.11, "Iron": 0.11, "Quartz": 0.12, "Corundum": 0.14, "Copper": 0.12, "Aluminum": 0.19 } },
+      "M-Type": { "sig": 4850, "probabilities": { "Quantanium": 0.02, "Bexalite": 0.03, "Taranite": 0.05, "Gold": 0.25, "Agricium": 0.57, "Tungsten": 0.11, "Titanium": 0.15, "Iron": 0.15, "Quartz": 0.11, "Corundum": 0.22, "Copper": 0.11, "Aluminum": 0.16 } },
+      "P-Type": { "sig": 4750, "probabilities": { "Quantanium": 0.02, "Bexalite": 0.20, "Taranite": 0.22, "Gold": 0.06, "Laranite": 0.47, "Tungsten": 0.14, "Titanium": 0.13, "Iron": 0.12, "Quartz": 0.08, "Corundum": 0.18, "Copper": 0.16, "Aluminum": 0.20 } },
+      "Q-Type": { "sig": 4870, "probabilities": { "Quantanium": 0.04, "Bexalite": 0.13, "Taranite": 0.10, "Gold": 0.12, "Borase": 0.27, "Laranite": 0.28, "Tungsten": 0.15, "Titanium": 0.14, "Iron": 0.12, "Quartz": 0.16, "Corundum": 0.16, "Copper": 0.16, "Aluminum": 0.14 } },
+      "S-Type": { "sig": 4720, "probabilities": { "Quantanium": 0.02, "Bexalite": 0.13, "Taranite": 0.16, "Gold": 0.06, "Laranite": 0.23, "Beryl": 0.38, "Tungsten": 0.15, "Titanium": 0.16, "Iron": 0.19, "Quartz": 0.13, "Corundum": 0.08, "Copper": 0.09, "Aluminum": 0.21 } },
+      "I-Type": { "sig": 4000, "probabilities": {} }
     },
-    "Pyro": {
-        "C-Type": {
-            "sig": 1700,
-            "probabilities": {
-                "Quantanium": 0.05,
-                "Laranite": 0.15,
-                "Hephaestanite": 0.35,
-                "Taranite": 0.1
-            }
-        },
-        "E-Type": {
-            "sig": 1900,
-            "probabilities": {
-                "Beryl": 0.45,
-                "Titanium": 0.25
-            }
-        },
-        "M-Type": {
-            "sig": 1850,
-            "probabilities": {
-                "Agricium": 0.5,
-                "Gold": 0.2
-            }
-        },
-        "P-Type": {
-            "sig": 1750,
-            "probabilities": {
-                "Laranite": 0.4,
-                "Taranite": 0.15
-            }
-        },
-        "Q-Type": {
-            "sig": 1870,
-            "probabilities": {
-                "Quantanium": 0.1,
-                "Laranite": 0.2
-            }
-        },
-        "S-Type": {
-            "sig": 1720,
-            "probabilities": {
-                "Beryl": 0.35,
-                "Laranite": 0.15
-            }
-        }
-    },
-    "Nyx": {
-        "C-Type": {
-            "sig": 1700,
-            "probabilities": {
-                "Quantanium": 0.04,
-                "Borase": 0.3
-            }
-        },
-        "E-Type": {
-            "sig": 1900,
-            "probabilities": {
-                "Beryl": 0.3,
-                "Laranite": 0.1
-            }
-        },
-        "M-Type": {
-            "sig": 1850,
-            "probabilities": {
-                "Agricium": 0.4
-            }
-        },
-        "P-Type": {
-            "sig": 1750,
-            "probabilities": {
-                "Laranite": 0.35
-            }
-        },
-        "Q-Type": {
-            "sig": 1870,
-            "probabilities": {
-                "Quantanium": 0.08
-            }
-        },
-        "S-Type": {
-            "sig": 1720,
-            "probabilities": {
-                "Beryl": 0.25
-            }
-        }
+    "surface_deposits": {
+      "Atacamite": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.03, "Bexalite": 0.11, "Taranite": 0.06, "Gold": 0.20, "Agricium": 0.25, "Hephaestanite": 0.28, "Tungsten": 0.08, "Titanium": 0.14, "Iron": 0.34, "Quartz": 0.13, "Corundum": 0.18, "Copper": 0.04, "Aluminum": 0.13 } },
+      "Felsic": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.05, "Bexalite": 0.12, "Taranite": 0.20, "Gold": 0.09, "Beryl": 0.48, "Tungsten": 0.08, "Titanium": 0.26, "Iron": 0.13, "Quartz": 0.22, "Corundum": 0.15, "Copper": 0.04, "Aluminum": 0.13 } },
+      "Gneiss": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.04, "Bexalite": 0.18, "Taranite": 0.19, "Gold": 0.11, "Hephaestanite": 0.39, "Titanium": 0.35, "Iron": 0.09, "Quartz": 0.14, "Corundum": 0.12, "Copper": 0.06, "Aluminum": 0.24 } },
+      "Granite": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.09, "Bexalite": 0.09, "Taranite": 0.07, "Gold": 0.25, "Borase": 0.43, "Titanium": 0.26, "Iron": 0.10, "Quartz": 0.11, "Corundum": 0.10, "Copper": 0.03, "Aluminum": 0.42 } },
+      "Igneous": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.07, "Bexalite": 0.09, "Taranite": 0.16, "Gold": 0.19, "Laranite": 0.40, "Tungsten": 0.12, "Titanium": 0.26, "Iron": 0.14, "Quartz": 0.10, "Corundum": 0.09, "Copper": 0.01, "Aluminum": 0.31 } },
+      "Obsidian": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.03, "Bexalite": 0.07, "Taranite": 0.14, "Gold": 0.15, "Borase": 0.18, "Beryl": 0.35, "Tungsten": 0.06, "Titanium": 0.05, "Iron": 0.19, "Quartz": 0.14, "Corundum": 0.16, "Copper": 0.05, "Aluminum": 0.37 } },
+      "Quartzite": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.02, "Bexalite": 0.13, "Taranite": 0.16, "Gold": 0.06, "Agricium": 0.16, "Hephaestanite": 0.40, "Titanium": 0.09, "Iron": 0.23, "Quartz": 0.11, "Corundum": 0.13, "Copper": 0.04, "Aluminum": 0.41 } },
+      "Shale": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.07, "Bexalite": 0.07, "Taranite": 0.13, "Gold": 0.26, "Laranite": 0.37, "Titanium": 0.10, "Iron": 0.17, "Quartz": 0.14, "Corundum": 0.21, "Copper": 0.05, "Aluminum": 0.33 } }
     }
+  },
+  "Pyro": {
+    "asteroid_types": {
+      "C-Type": { "sig": 4700, "probabilities": { "Stileron": 0.01, "Quantanium": 0.03, "Bexalite": 0.16, "Taranite": 0.23, "Gold": 0.08, "Hephaestanite": 0.45, "Tungsten": 0.15, "Titanium": 0.12, "Iron": 0.08, "Quartz": 0.07, "Corundum": 0.15, "Copper": 0.15, "Aluminum": 0.12, "Tin": 0.10, "Silicon": 0.06 } },
+      "E-Type": { "sig": 4900, "probabilities": { "Stileron": 0.02, "Riccite": 0.01, "Quantanium": 0.03, "Bexalite": 0.10, "Taranite": 0.11, "Gold": 0.33, "Beryl": 0.37, "Tungsten": 0.14, "Titanium": 0.11, "Iron": 0.10, "Quartz": 0.09, "Corundum": 0.11, "Copper": 0.09, "Aluminum": 0.15, "Tin": 0.13, "Silicon": 0.09 } },
+      "I-Type": { "sig": 4000, "probabilities": { "Stileron": 0.01, "Riccite": 0.02, "Bexalite": 0.04, "Taranite": 0.10, "Gold": 0.05, "Borase": 0.08, "Agricium": 0.24, "Hephaestanite": 0.39, "Ice": 0.80 } },
+      "M-Type": { "sig": 4850, "probabilities": { "Stileron": 0.01, "Riccite": 0.01, "Quantanium": 0.03, "Lindinium": 0.01, "Bexalite": 0.03, "Taranite": 0.05, "Gold": 0.22, "Agricium": 0.60, "Tungsten": 0.09, "Titanium": 0.12, "Torite": 0.01, "Iron": 0.13, "Quartz": 0.06, "Corundum": 0.18, "Copper": 0.10, "Aluminum": 0.10, "Tin": 0.09, "Silicon": 0.10 } },
+      "P-Type": { "sig": 4750, "probabilities": { "Stileron": 0.01, "Riccite": 0.01, "Quantanium": 0.04, "Bexalite": 0.19, "Taranite": 0.20, "Gold": 0.07, "Laranite": 0.43, "Tungsten": 0.06, "Titanium": 0.11, "Iron": 0.10, "Quartz": 0.10, "Corundum": 0.11, "Copper": 0.08, "Aluminum": 0.18, "Tin": 0.12, "Silicon": 0.12 } },
+      "Q-Type": { "sig": 4870, "probabilities": { "Stileron": 0.01, "Quantanium": 0.04, "Bexalite": 0.12, "Taranite": 0.12, "Gold": 0.15, "Borase": 0.23, "Laranite": 0.30, "Tungsten": 0.11, "Titanium": 0.18, "Iron": 0.10, "Quartz": 0.12, "Corundum": 0.11, "Copper": 0.09, "Aluminum": 0.12, "Tin": 0.11, "Silicon": 0.08 } },
+      "S-Type": { "sig": 4720, "probabilities": { "Riccite": 0.01, "Quantanium": 0.01, "Bexalite": 0.12, "Taranite": 0.16, "Gold": 0.05, "Laranite": 0.18, "Beryl": 0.43, "Tungsten": 0.11, "Titanium": 0.15, "Iron": 0.08, "Quartz": 0.07, "Corundum": 0.07, "Copper": 0.05, "Aluminum": 0.19, "Tin": 0.13, "Silicon": 0.16 } }
+    },
+    "surface_deposits": {
+      "Atacamite": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.03, "Bexalite": 0.08, "Taranite": 0.05, "Gold": 0.21, "Agricium": 0.26, "Hephaestanite": 0.25, "Tungsten": 0.10, "Titanium": 0.21, "Quartz": 0.07, "Corundum": 0.24, "Copper": 0.04, "Aluminum": 0.18, "Tin": 0.13, "Silicon": 0.03 } },
+      "Felsic": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Stileron": 0.01, "Riccite": 0.01, "Quantanium": 0.02, "Bexalite": 0.12, "Taranite": 0.17, "Gold": 0.06, "Beryl": 0.56, "Tungsten": 0.03, "Titanium": 0.22, "Quartz": 0.03, "Corundum": 0.17, "Copper": 0.06, "Aluminum": 0.05, "Tin": 0.39, "Silicon": 0.04 } },
+      "Gneiss": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.04, "Bexalite": 0.16, "Taranite": 0.19, "Gold": 0.11, "Hephaestanite": 0.45, "Titanium": 0.32, "Quartz": 0.09, "Corundum": 0.27, "Copper": 0.05, "Aluminum": 0.12, "Tin": 0.07, "Silicon": 0.06 } },
+      "Granite": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Riccite": 0.01, "Quantanium": 0.08, "Bexalite": 0.10, "Taranite": 0.07, "Gold": 0.24, "Borase": 0.45, "Titanium": 0.33, "Iron": 0.02, "Quartz": 0.03, "Corundum": 0.12, "Copper": 0.04, "Aluminum": 0.42, "Tin": 0.05, "Silicon": 0.04 } },
+      "Igneous": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Stileron": 0.01, "Riccite": 0.02, "Quantanium": 0.03, "Bexalite": 0.11, "Taranite": 0.15, "Gold": 0.19, "Laranite": 0.39, "Tungsten": 0.07, "Titanium": 0.10, "Quartz": 0.04, "Corundum": 0.22, "Aluminum": 0.17, "Tin": 0.39, "Silicon": 0.02 } },
+      "Obsidian": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Riccite": 0.01, "Quantanium": 0.03, "Bexalite": 0.07, "Taranite": 0.12, "Gold": 0.12, "Borase": 0.21, "Beryl": 0.35, "Tungsten": 0.14, "Titanium": 0.16, "Iron": 0.08, "Quartz": 0.06, "Corundum": 0.16, "Copper": 0.07, "Aluminum": 0.13, "Tin": 0.17, "Silicon": 0.05 } },
+      "Quartzite": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Quantanium": 0.01, "Bexalite": 0.15, "Taranite": 0.15, "Gold": 0.09, "Agricium": 0.14, "Hephaestanite": 0.39, "Tungsten": 0.05, "Titanium": 0.15, "Iron": 0.05, "Quartz": 0.07, "Corundum": 0.16, "Copper": 0.10, "Aluminum": 0.19, "Tin": 0.18, "Silicon": 0.04 } },
+      "Shale": { "ship_sig": 4000, "hand_sig": 3000, "probabilities": { "Stileron": 0.01, "Riccite": 0.02, "Quantanium": 0.04, "Bexalite": 0.08, "Taranite": 0.12, "Gold": 0.26, "Laranite": 0.37, "Tungsten": 0.06, "Titanium": 0.23, "Quartz": 0.04, "Corundum": 0.20, "Copper": 0.09, "Aluminum": 0.18, "Tin": 0.20, "Silicon": 0.01 } }
+    }
+  },
+  "Nyx": {
+    "asteroid_types": {
+      "C-Type": { "sig": 4700, "probabilities": { "Quantanium": 0.06, "Bexalite": 0.20, "Taranite": 0.24, "Gold": 0.14, "Hephaestanite": 0.43, "Quartz": 1.09 } },
+      "E-Type": { "sig": 4900, "probabilities": { "Quantanium": 0.02, "Bexalite": 0.09, "Taranite": 0.09, "Gold": 0.33, "Beryl": 0.43, "Quartz": 0.47, "Aluminum": 0.58 } },
+      "M-Type": { "sig": 4850, "probabilities": { "Savrilium": 0.02, "Lindinium": 0.25, "Bexalite": 0.05, "Taranite": 0.05, "Gold": 0.01, "Agricium": 0.50, "Torite": 0.95, "Quartz": 0.09 } },
+      "P-Type": { "sig": 4750, "probabilities": { "Quantanium": 0.10, "Bexalite": 0.18, "Taranite": 0.19, "Gold": 0.07, "Laranite": 0.43, "Quartz": 1.04 } },
+      "Q-Type": { "sig": 4870, "probabilities": { "Quantanium": 0.04, "Bexalite": 0.08, "Taranite": 0.14, "Gold": 0.09, "Borase": 0.31, "Laranite": 0.32, "Quartz": 1.01 } },
+      "S-Type": { "sig": 4720, "probabilities": { "Quantanium": 0.03, "Bexalite": 0.11, "Taranite": 0.17, "Gold": 0.07, "Laranite": 0.15, "Beryl": 0.47, "Quartz": 0.41, "Aluminum": 0.63 } }
+    }
+  }
 }
