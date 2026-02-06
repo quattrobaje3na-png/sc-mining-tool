@@ -5,63 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Citizen Starter Guide - Mining Intel</title>
     <style>
-        body { background:#000; color:#FFB300; font-family: monospace; padding:15px; line-height: 1.4; }
-        .header { border-bottom:1px solid #332200; margin-bottom:20px; padding-bottom:10px; }
-        
-        /* Status Indicator */
-        .status-pill { display: inline-block; padding: 2px 8px; font-size: 10px; border-radius: 3px; margin-bottom: 5px; font-weight: bold; }
+        body { background:#000; color:#FFB300; font-family: monospace; padding:15px; }
+        .header { border-bottom:1px solid #332200; margin-bottom:20px; }
+        .status-pill { display: inline-block; padding: 2px 8px; font-size: 10px; border-radius: 3px; font-weight: bold; margin-bottom: 10px; }
         .live { background: #004400; color: #00FF00; border: 1px solid #00FF00; }
         .backup { background: #442200; color: #FFB300; border: 1px solid #FFB300; }
         
-        /* Form Elements */
-        label { font-size: 10px; text-transform: uppercase; color: #665500; display: block; margin-top: 10px; margin-bottom: 2px; }
+        label { font-size: 10px; color: #665500; display: block; margin-top: 10px; }
         select, button { 
             background:#111; color:#FFB300; border:1px solid #FFB300; 
-            padding:12px; margin-bottom:10px; width:100%; font-size: 16px;
-            border-radius:0; outline: none;
+            padding:12px; margin-bottom:10px; width:100%; font-size: 16px; border-radius: 0;
         }
-        button { background:#1a1a1a; font-weight:bold; cursor:pointer; text-transform:uppercase; transition: 0.2s; }
-        button:hover { background:#FFB300; color:#000; }
-        
-        /* Results Styling */
-        .card { border:1px solid #332200; border-left:4px solid #FFB300; padding:12px; margin-bottom:10px; background:#050505; }
-        .loc-name { color: #fff; font-size: 16px; font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 8px; display: block; }
-        .row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
-        .prob-val { color: #00FF00; }
+        button { background: #1a1a1a; cursor: pointer; text-transform: uppercase; font-weight: bold; }
+        button:hover { background: #FFB300; color: #000; }
+
+        .card { border: 1px solid #332200; border-left: 4px solid #FFB300; padding: 12px; margin-bottom: 10px; background: #050505; }
+        .loc-title { color: #fff; font-size: 16px; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 8px; display: block; }
+        .row { display: flex; justify-content: space-between; font-size: 14px; padding: 3px 0; }
+        .prob { color: #00FF00; font-weight: bold; }
+
+        #debug-log { background: #110000; color: #ff5555; padding: 10px; font-size: 10px; border: 1px solid #440000; margin-top: 20px; max-height: 150px; overflow-y: auto; display: none; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div id="data-status" class="status-pill">CONNECTING...</div>
-        <h2 style="margin:5px 0;">> MINING_INTEL_SYSTEM</h2>
-        <p style="font-size:10px; color:#666;">v45.1 | LIVE_SYNC_ENABLED</p>
+        <div id="data-status" class="status-pill backup">INITIATING_SYSTEM...</div>
+        <h2 style="margin:0;">> MINING_INTEL_v45.3</h2>
     </div>
 
-    <label>Select Star System</label>
+    <label>Target_Star_System</label>
     <select id="sys-select">
-        <option value="Stanton">STANTON_SYSTEM</option>
-        <option value="Pyro">PYRO_SYSTEM</option>
-        <option value="Nyx">NYX_SYSTEM</option>
+        <option value="ALL">ALL_KNOWN_SYSTEMS</option>
+        <option value="Stanton">STANTON</option>
+        <option value="Pyro">PYRO</option>
+        <option value="Nyx">NYX</option>
     </select>
 
-    <label>Resource Priority 01</label>
-    <select class="ore-sel" id="ore1"></select>
+    <label>Material_Priority 01</label>
+    <select class="ore-sel"></select>
 
-    <label>Resource Priority 02</label>
-    <select class="ore-sel" id="ore2"></select>
+    <label>Material_Priority 02</label>
+    <select class="ore-sel"></select>
 
-    <label>Resource Priority 03</label>
-    <select class="ore-sel" id="ore3"></select>
+    <label>Material_Priority 03</label>
+    <select class="ore-sel"></select>
 
-    <button onclick="scan()">Initiate Scan</button>
+    <button onclick="scan()">Initiate Deep Scan</button>
 
     <div id="results"></div>
+    <div id="debug-log"></div>
 
     <script>
-        let oreData, rockData;
+        let oreData;
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
-        
-        // Full list of Mining Materials
         const MATERIALS = [
             "Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", 
             "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", 
@@ -70,108 +66,86 @@
             "Torite", "Tungsten"
         ];
 
-        // 1. Populate Dropdowns Automatically
-        function populateDropdowns() {
-            const dropdowns = document.querySelectorAll('.ore-sel');
-            const sortedMaterials = MATERIALS.sort();
-            
-            dropdowns.forEach(sel => {
-                let html = '<option value="">- NO SELECTION -</option>';
-                sortedMaterials.forEach(m => {
-                    html += `<option value="${m}">${m.toUpperCase()}</option>`;
-                });
-                sel.innerHTML = html;
-            });
-        }
-
-        // 2. Fetch Logic (Live with Fallback)
-        async function loadData(liveFile, masterFile) {
-            try {
-                // Try live version first
-                let res = await fetch(BASE_URL + liveFile, { cache: "no-store" });
-                if (!res.ok) throw new Error();
-                return { data: await res.json(), source: 'LIVE' };
-            } catch (e) {
-                // Fallback to master version
-                let res = await fetch(BASE_URL + masterFile);
-                return { data: await res.json(), source: 'MASTER' };
-            }
+        function log(msg) {
+            const d = document.getElementById('debug-log');
+            d.style.display = 'block';
+            d.innerHTML += `> ${msg}<br>`;
         }
 
         async function init() {
-            populateDropdowns();
-            const statusIndicator = document.getElementById('data-status');
+            // Populate dropdowns with all materials
+            document.querySelectorAll('.ore-sel').forEach(s => {
+                s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
+                    MATERIALS.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
+            });
 
-            const oreRes = await loadData('ore_locations_live.json', 'ore_locations.json');
-            const rockRes = await loadData('rock_live.json', 'rock.json');
-
-            oreData = oreRes.data;
-            rockData = rockRes.data;
-
-            if (oreRes.source === 'LIVE') {
-                statusIndicator.className = "status-pill live";
-                statusIndicator.innerText = "DATABASE: LIVE_UPDATED";
-            } else {
-                statusIndicator.className = "status-pill backup";
-                statusIndicator.innerText = "DATABASE: MASTER_FALLBACK";
+            const status = document.getElementById('data-status');
+            
+            try {
+                log("Checking for Live Sync Data...");
+                let res = await fetch(BASE_URL + 'ore_locations_live.json', {cache: "no-store"});
+                if (!res.ok) throw new Error();
+                oreData = await res.json();
+                status.className = "status-pill live";
+                status.innerText = "DB: LIVE_ACTIVE";
+                log(`Success! Loaded ${Object.keys(oreData).length} locations from live sync.`);
+            } catch (e) {
+                log("Live sync unavailable, checking Master database...");
+                try {
+                    let res = await fetch(BASE_URL + 'ore_locations.json');
+                    oreData = await res.json();
+                    status.className = "status-pill backup";
+                    status.innerText = "DB: MASTER_FALLBACK";
+                    log(`Loaded ${Object.keys(oreData).length} master locations.`);
+                } catch (err) {
+                    log("CRITICAL ERROR: Failed to initialize mining database.");
+                }
             }
         }
 
-        // 3. Search and Filter Logic
         function scan() {
             const out = document.getElementById('results');
-            const picks = Array.from(document.querySelectorAll('.ore-sel'))
-                               .map(s => s.value)
-                               .filter(v => v !== "");
+            const system = document.getElementById('sys-select').value;
+            const picks = Array.from(document.querySelectorAll('.ore-sel')).map(s => s.value).filter(v => v);
             
             out.innerHTML = "";
-            if (!oreData) return;
+            if (!oreData) { log("Scan aborted: Database not ready."); return; }
 
-            let foundAny = false;
-
-            // Iterate through locations in the dataset
+            let found = 0;
             for (let loc in oreData) {
-                let matches = [];
-                let totalProb = 0;
+                // Detect system from location name
+                const locName = loc.toUpperCase();
+                const isPyro = locName.includes('PYRO') || locName.includes('RAB') || locName.includes('RMB');
+                const isNyx = locName.includes('NYX') || locName.includes('GLACIUM');
+                const currentLocSys = isPyro ? 'Pyro' : (isNyx ? 'Nyx' : 'Stanton');
 
+                if (system !== "ALL" && system !== currentLocSys) continue;
+
+                let matches = [];
                 picks.forEach(p => {
-                    // Match case-insensitively
-                    const key = Object.keys(oreData[loc].ores || {})
-                                      .find(k => k.toLowerCase() === p.toLowerCase());
-                    
+                    const ores = oreData[loc].ores || {};
+                    // Case-insensitive lookup for material
+                    const key = Object.keys(ores).find(k => k.toLowerCase() === p.toLowerCase());
                     if (key) {
-                        const prob = oreData[loc].ores[key];
-                        matches.push({ name: key, prob: (prob * 100).toFixed(1) });
-                        totalProb += prob;
+                        const prob = ores[key];
+                        matches.push({ name: key.toUpperCase(), prob: (prob * 100).toFixed(1) });
                     }
                 });
 
                 if (matches.length > 0) {
-                    foundAny = true;
+                    found++;
                     const card = document.createElement('div');
                     card.className = "card";
-                    
-                    let rowsHtml = matches.map(m => `
-                        <div class="row">
-                            <span>${m.name.toUpperCase()}</span>
-                            <span class="prob-val">${m.prob}%</span>
-                        </div>
-                    `).join('');
-
-                    card.innerHTML = `
-                        <span class="loc-name">${loc.toUpperCase()}</span>
-                        ${rowsHtml}
-                    `;
+                    let rows = matches.map(m => `<div class="row"><span>${m.name}</span><span class="prob">${m.prob}%</span></div>`).join('');
+                    card.innerHTML = `<span class="loc-title">${loc.toUpperCase()} [${currentLocSys.toUpperCase()}]</span>${rows}`;
                     out.appendChild(card);
                 }
             }
 
-            if (!foundAny) {
-                out.innerHTML = `<p style="color:#666; text-align:center;">NO DEPOSITS FOUND FOR SELECTED CRITERIA</p>`;
-            }
+            if (found === 0) out.innerHTML = "<p style='color:#666; text-align:center;'>NO RESOURCE SIGNATURES DETECTED</p>";
         }
 
-        window.onload = init;
+        init();
     </script>
 </body>
 </html>
