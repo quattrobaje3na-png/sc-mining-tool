@@ -21,15 +21,15 @@
 
         .card { border: 1px solid #332200; border-left: 4px solid #FFB300; padding: 12px; margin-bottom: 10px; background: #050505; }
         .loc-title { color: #fff; font-size: 16px; font-weight: bold; display: block; }
-        .sig-bar { font-size: 10px; color: #888; margin-bottom: 8px; border-bottom: 1px solid #222; padding-bottom: 4px; text-transform: uppercase; }
-        .row { display: flex; justify-content: space-between; font-size: 14px; padding: 3px 0; }
-        .prob { color: #00FF00; font-weight: bold; }
+        .row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 8px 0; border-bottom: 1px solid #111; }
+        .prob { color: #00FF00; font-weight: bold; font-size: 18px; }
+        .meta-text { font-size: 10px; color: #666; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div id="data-status" class="status-pill backup">INTEL_OFFLINE</div>
-        <h2 style="margin:0;">> MINING_INTEL_v47.2</h2>
+        <div id="data-status" class="status-pill backup">DB: INITIALIZING</div>
+        <h2 style="margin:0;">> MINING_INTEL_v48.1</h2>
     </div>
 
     <label>Target_Star_System</label>
@@ -51,43 +51,118 @@
     <div id="results"></div>
 
     <script>
-        let oreData, rockData, filterData, sortingData;
+        // Material-to-Rock Mapping for HUD display
+        const ROCK_MAP = {
+            "Quantainium": { type: "Q-Type", sig: 4870 },
+            "Laranite": { type: "P/Q-Type", sig: "4750/4870" },
+            "Agricium": { type: "M-Type", sig: 4850 },
+            "Taranite": { type: "M-Type", sig: 4850 },
+            "Hephaestanite": { type: "C-Type", sig: 4700 },
+            "Borase": { type: "C-Type", sig: 4700 },
+            "Beryl": { type: "S/E-Type", sig: "4720/4900" },
+            "Titanium": { type: "E-Type", sig: 4900 },
+            "Tungsten": { type: "P-Type", sig: 4750 },
+            "Copper": { type: "P-Type", sig: 4750 },
+            "Quartz": { type: "C/P/Q-Type", sig: "4700-4870" },
+            "Bexalite": { type: "Multi-Type", sig: "4700+" }
+        };
+
+        const MATERIALS = ["Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", "Laranite", "Lindinium", "Quantainium", "Quartz", "Riccite", "Savrilium", "Silicon", "Stileron", "Taranite", "Tin", "Titanium", "Torite", "Tungsten"];
+
+        let oreData, sortingData;
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
 
-        async function fetchWithFallback(liveFile, masterFile) {
-            try {
-                const res = await fetch(BASE_URL + liveFile, { cache: "no-store" });
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                return { data, isLive: true };
-            } catch (e) {
-                const res = await fetch(BASE_URL + masterFile);
-                const data = await res.json();
-                return { data, isLive: false };
-            }
-        }
+        // Populate menus immediately
+        document.querySelectorAll('.ore-sel').forEach(s => {
+            s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
+                MATERIALS.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
+        });
 
         async function init() {
             const status = document.getElementById('data-status');
             try {
-                const [fRes, sRes] = await Promise.all([
-                    fetch(BASE_URL + 'filter.json'),
-                    fetch(BASE_URL + 'system_sorting.json')
-                ]);
-                filterData = await fRes.json();
+                const sRes = await fetch(BASE_URL + 'system_sorting.json');
                 sortingData = await sRes.json();
 
-                const materials = filterData.materials || [];
-                document.querySelectorAll('.ore-sel').forEach(s => {
-                    s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
-                        materials.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
+                try {
+                    const oRes = await fetch(BASE_URL + 'ore_locations_live.json', { cache: "no-store" });
+                    if (!oRes.ok) throw new Error();
+                    oreData = await oRes.json();
+                    status.className = "status-pill live";
+                    status.innerText = "DB: LIVE_DATA_ACTIVE";
+                } catch (e) {
+                    const oRes = await fetch(BASE_URL + 'ore_locations.json');
+                    oreData = await oRes.json();
+                    status.className = "status-pill backup";
+                    status.innerText = "DB: MASTER_BACKUP_ACTIVE";
+                }
+            } catch (err) {
+                status.innerText = "DB: CONNECTION_ERROR";
+            }
+        }
+
+        function scan() {
+            const out = document.getElementById('results');
+            const selectedSys = document.getElementById('sys-select').value;
+            const picks = Array.from(document.querySelectorAll('.ore-sel')).map(s => s.value).filter(v => v);
+            
+            out.innerHTML = "";
+            if (!oreData || !sortingData) return;
+
+            for (let loc in oreData) {
+                let locSystem = "Stanton"; 
+                if (sortingData.star_system_groups) {
+                    for (let sys in sortingData.star_system_groups) {
+                        if (sortingData.star_system_groups[sys].includes(loc)) {
+                            locSystem = sys;
+                            break;
+                        }
+                    }
+                }
+
+                if (selectedSys !== "ALL" && selectedSys !== locSystem) continue;
+
+                let matches = [];
+                picks.forEach(p => {
+                    const locOres = oreData[loc].ores || {};
+                    if (locOres[p]) {
+                        const meta = ROCK_MAP[p] || { type: "Gen-Type", sig: "SCAN" };
+                        matches.push({ 
+                            name: p.toUpperCase(), 
+                            prob: (locOres[p] * 100).toFixed(1),
+                            rock: meta.type,
+                            sig: meta.sig
+                        });
+                    }
                 });
 
-                const oreRes = await fetchWithFallback('ore_locations_live.json', 'ore_locations.json');
-                const rockRes = await fetchWithFallback('rock_live.json', 'rock.json');
-                
-                oreData = oreRes.data;
-                rockData = rockRes.data;
+                if (matches.length > 0) {
+                    const card = document.createElement('div');
+                    card.className = "card";
 
-                status.className = oreRes.isLive ? "status-pill live" : "status-pill backup";
-                status.innerText = oreRes.isLive ? "DB: LIVE_DATA_ACTIVE" :
+                    let rows = matches.map(m => `
+                        <div class="row">
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-weight:bold; color:#fff;">${m.name}</span>
+                                <span class="meta-text">HUNT: ${m.rock} | SIG: ${m.sig}</span>
+                            </div>
+                            <span class="prob">${m.prob}%</span>
+                        </div>
+                    `).join('');
+
+                    card.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                            <span class="loc-title">${loc.toUpperCase()}</span>
+                            <span style="font-size:9px; color:#554400; border:1px solid #332200; padding:1px 4px;">${locSystem.toUpperCase()}</span>
+                        </div>
+                        ${rows}
+                    `;
+                    out.appendChild(card);
+                }
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
