@@ -7,137 +7,171 @@
     <style>
         body { background:#000; color:#FFB300; font-family: monospace; padding:15px; line-height: 1.4; }
         .header { border-bottom:1px solid #332200; margin-bottom:20px; padding-bottom:10px; }
-        select, button { background:#111; color:#FFB300; border:1px solid #FFB300; padding:12px; margin-bottom:10px; width:100%; font-size: 16px; border-radius:0; -webkit-appearance:none; }
-        button { font-weight:bold; cursor:pointer; text-transform:uppercase; background:#1a1a1a; transition: 0.2s; }
+        
+        /* Status Indicator */
+        .status-pill { display: inline-block; padding: 2px 8px; font-size: 10px; border-radius: 3px; margin-bottom: 5px; font-weight: bold; }
+        .live { background: #004400; color: #00FF00; border: 1px solid #00FF00; }
+        .backup { background: #442200; color: #FFB300; border: 1px solid #FFB300; }
+        
+        /* Form Elements */
+        label { font-size: 10px; text-transform: uppercase; color: #665500; display: block; margin-top: 10px; margin-bottom: 2px; }
+        select, button { 
+            background:#111; color:#FFB300; border:1px solid #FFB300; 
+            padding:12px; margin-bottom:10px; width:100%; font-size: 16px;
+            border-radius:0; outline: none;
+        }
+        button { background:#1a1a1a; font-weight:bold; cursor:pointer; text-transform:uppercase; transition: 0.2s; }
         button:hover { background:#FFB300; color:#000; }
+        
+        /* Results Styling */
         .card { border:1px solid #332200; border-left:4px solid #FFB300; padding:12px; margin-bottom:10px; background:#050505; }
-        .row { display: flex; justify-content: space-between; font-size: 14px; margin-top:5px; border-top: 1px solid #222; padding-top:5px; }
-        .sig-row { display: flex; justify-content: space-between; font-size: 13px; color: #00FF00; margin-top: 5px; background: #001100; padding: 4px; border: 1px dashed #004400; }
-        label { font-size: 10px; text-transform: uppercase; color: #665500; display: block; margin-bottom: 2px; letter-spacing: 1px; }
-        #data-status { display: inline-block; padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 3px; background: #004400; color: #00FF00; border: 1px solid #00FF00; margin-bottom: 5px; }
-        .loc-title { color: #fff; font-size: 15px; display: block; margin-bottom: 5px; }
-        .sig-label { font-size: 9px; color: #008800; font-weight: bold; margin-top: 8px; }
+        .loc-name { color: #fff; font-size: 16px; font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 8px; display: block; }
+        .row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
+        .prob-val { color: #00FF00; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div id="data-status">DATABASE: AUTO_SYNC_ACTIVE</div>
-        <h3>> INTEL_v41.0_ROBUST</h3>
-        <p style="font-size:11px; color:#666;">UNIFIED GROUND (4k/3k) & DYNAMIC SPACE SIGNATURES</p>
+        <div id="data-status" class="status-pill">CONNECTING...</div>
+        <h2 style="margin:5px 0;">> MINING_INTEL_SYSTEM</h2>
+        <p style="font-size:10px; color:#666;">v45.1 | LIVE_SYNC_ENABLED</p>
     </div>
 
-    <label>Region_Selection</label>
+    <label>Select Star System</label>
     <select id="sys-select">
         <option value="Stanton">STANTON_SYSTEM</option>
         <option value="Pyro">PYRO_SYSTEM</option>
         <option value="Nyx">NYX_SYSTEM</option>
     </select>
 
-    <label>Priority_Resource_01</label>
-    <select class="ore-sel"></select>
-    <label>Priority_Resource_02</label>
-    <select class="ore-sel"></select>
-    <label>Priority_Resource_03</label>
-    <select class="ore-sel"></select>
+    <label>Resource Priority 01</label>
+    <select class="ore-sel" id="ore1"></select>
 
-    <button onclick="scan()">Analyze Signal Signatures</button>
+    <label>Resource Priority 02</label>
+    <select class="ore-sel" id="ore2"></select>
+
+    <label>Resource Priority 03</label>
+    <select class="ore-sel" id="ore3"></select>
+
+    <button onclick="scan()">Initiate Scan</button>
+
     <div id="results"></div>
 
     <script>
-        let oreData, sysGroups, refMapping;
+        let oreData, rockData;
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
+        
+        // Full list of Mining Materials
+        const MATERIALS = [
+            "Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", 
+            "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", 
+            "Laranite", "Lindinium", "Quantainium", "Quartz", "Riccite", 
+            "Savrilium", "Silicon", "Stileron", "Taranite", "Tin", "Titanium", 
+            "Torite", "Tungsten"
+        ];
 
-        const MATERIALS = ["Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", "Laranite", "Lindinium", "Quantainium", "Quartz", "Riccite", "Savrilium", "Silicon", "Stileron", "Taranite", "Tin", "Titanium", "Torite", "Tungsten"];
-
-        const MAT_MAP = {
-            "Quantainium": ["Q"], "Laranite": ["P", "Q"], "Bexalite": ["Q", "M"], "Agricium": ["M"], "Taranite": ["M"], "Hephaestanite": ["C"], "Borase": ["C"], "Beryl": ["S", "E"], "Gold": ["M", "Q"], "Savrilium": ["M"], "Riccite": ["M"], "Torite": ["M"], "Titanium": ["E"], "Aluminum": ["S", "E"], "Copper": ["P"], "Tungsten": ["P"], "Quartz": ["C", "P", "Q"], "Ammonia": ["I"], "Ice": ["I"]
-        };
-
-        async function init() {
-            document.querySelectorAll('.ore-sel').forEach(sel => {
-                sel.innerHTML = '<option value="">- SELECT MATERIAL -</option>';
-                MATERIALS.sort().forEach(m => {
-                    let opt = document.createElement('option');
-                    opt.value = m; opt.textContent = m.toUpperCase();
-                    sel.appendChild(opt);
+        // 1. Populate Dropdowns Automatically
+        function populateDropdowns() {
+            const dropdowns = document.querySelectorAll('.ore-sel');
+            const sortedMaterials = MATERIALS.sort();
+            
+            dropdowns.forEach(sel => {
+                let html = '<option value="">- NO SELECTION -</option>';
+                sortedMaterials.forEach(m => {
+                    html += `<option value="${m}">${m.toUpperCase()}</option>`;
                 });
+                sel.innerHTML = html;
             });
-
-            try {
-                const configs = await Promise.all([
-                    fetch(BASE_URL + 'ore_locations.json', {cache: "no-store"}).then(r => r.json()),
-                    fetch(BASE_URL + 'system_sorting.json', {cache: "no-store"}).then(r => r.json()),
-                    fetch(BASE_URL + 'reference.json', {cache: "no-store"}).then(r => r.json())
-                ]);
-                [oreData, sysGroups, refMapping] = configs;
-            } catch (err) { console.error("Sync Error", err); }
         }
 
+        // 2. Fetch Logic (Live with Fallback)
+        async function loadData(liveFile, masterFile) {
+            try {
+                // Try live version first
+                let res = await fetch(BASE_URL + liveFile, { cache: "no-store" });
+                if (!res.ok) throw new Error();
+                return { data: await res.json(), source: 'LIVE' };
+            } catch (e) {
+                // Fallback to master version
+                let res = await fetch(BASE_URL + masterFile);
+                return { data: await res.json(), source: 'MASTER' };
+            }
+        }
+
+        async function init() {
+            populateDropdowns();
+            const statusIndicator = document.getElementById('data-status');
+
+            const oreRes = await loadData('ore_locations_live.json', 'ore_locations.json');
+            const rockRes = await loadData('rock_live.json', 'rock.json');
+
+            oreData = oreRes.data;
+            rockData = rockRes.data;
+
+            if (oreRes.source === 'LIVE') {
+                statusIndicator.className = "status-pill live";
+                statusIndicator.innerText = "DATABASE: LIVE_UPDATED";
+            } else {
+                statusIndicator.className = "status-pill backup";
+                statusIndicator.innerText = "DATABASE: MASTER_FALLBACK";
+            }
+        }
+
+        // 3. Search and Filter Logic
         function scan() {
             const out = document.getElementById('results');
-            const system = document.getElementById('sys-select').value;
-            const picks = Array.from(document.querySelectorAll('.ore-sel')).map(s => s.value).filter(v => v);
-
+            const picks = Array.from(document.querySelectorAll('.ore-sel'))
+                               .map(s => s.value)
+                               .filter(v => v !== "");
+            
             out.innerHTML = "";
-            if (!oreData || !sysGroups) return;
+            if (!oreData) return;
 
-            const activeGroup = (sysGroups.star_system_groups[system] || []).map(id => id.replace(/[-_]/g, '').toUpperCase());
-            const mapping = refMapping.location_mapping || {};
-            const matches = [];
+            let foundAny = false;
 
-            for (let rawID in oreData) {
-                if (/^[A-Z]{3}-\d{3}$/.test(rawID)) continue;
-                const normID = rawID.replace(/[-_]/g, '').toUpperCase();
-                if (!activeGroup.includes(normID)) continue;
-
-                let locResults = [];
+            // Iterate through locations in the dataset
+            for (let loc in oreData) {
+                let matches = [];
                 let totalProb = 0;
-                let sigDisplay = new Set();
-                const data = oreData[rawID];
-                const ores = data.ores || data; // Handle both old and new JSON formats
 
                 picks.forEach(p => {
-                    const oreKey = Object.keys(ores).find(k => k.toLowerCase() === p.toLowerCase());
-                    if (oreKey) {
-                        const prob = ores[oreKey].prob || ores[oreKey]; 
-                        locResults.push({ name: oreKey.toUpperCase(), val: (parseFloat(prob) * 100).toFixed(1) });
-                        totalProb += parseFloat(prob);
-
-                        // Unified Logic check
-                        const isPlanet = data.is_planetary || !(['L1','L2','L3','L4','L5','HALO','BELT'].some(k => rawID.toUpperCase().includes(k)));
-                        
-                        if (isPlanet) {
-                            sigDisplay.add("GROUND (SHIP/VEH): 4000");
-                            sigDisplay.add("HAND (FPS): 3000");
-                        } else if (MAT_MAP[p]) {
-                            MAT_MAP[p].forEach(type => {
-                                if (data.signatures && data.signatures[type]) {
-                                    sigDisplay.add(`${type}-TYPE: ${data.signatures[type].sig}`);
-                                }
-                            });
-                        }
+                    // Match case-insensitively
+                    const key = Object.keys(oreData[loc].ores || {})
+                                      .find(k => k.toLowerCase() === p.toLowerCase());
+                    
+                    if (key) {
+                        const prob = oreData[loc].ores[key];
+                        matches.push({ name: key, prob: (prob * 100).toFixed(1) });
+                        totalProb += prob;
                     }
                 });
 
-                if (locResults.length > 0) {
-                    matches.push({ name: mapping[rawID] || rawID, ores: locResults, sigs: Array.from(sigDisplay), sortVal: totalProb });
+                if (matches.length > 0) {
+                    foundAny = true;
+                    const card = document.createElement('div');
+                    card.className = "card";
+                    
+                    let rowsHtml = matches.map(m => `
+                        <div class="row">
+                            <span>${m.name.toUpperCase()}</span>
+                            <span class="prob-val">${m.prob}%</span>
+                        </div>
+                    `).join('');
+
+                    card.innerHTML = `
+                        <span class="loc-name">${loc.toUpperCase()}</span>
+                        ${rowsHtml}
+                    `;
+                    out.appendChild(card);
                 }
             }
 
-            if (matches.length === 0) {
-                out.innerHTML = "<p style='color:#665500;'>SIGNAL LOST: NO MATCHES FOUND</p>";
-            } else {
-                matches.sort((a, b) => b.sortVal - a.sortVal).forEach(m => {
-                    const card = document.createElement('div');
-                    card.className = "card";
-                    let oreRows = m.ores.map(o => `<div class="row"><span>${o.name}</span><span>${o.val}%</span></div>`).join('');
-                    let sigSection = m.sigs.length > 0 ? `<div class="sig-label">TARGET_SIGNATURES:</div>` + m.sigs.map(s => `<div class="sig-row">${s}</div>`).join('') : "";
-                    card.innerHTML = `<span class="loc-title"><strong>${m.name}</strong></span>${oreRows}${sigSection}`;
-                    out.appendChild(card);
-                });
+            if (!foundAny) {
+                out.innerHTML = `<p style="color:#666; text-align:center;">NO DEPOSITS FOUND FOR SELECTED CRITERIA</p>`;
             }
         }
-        init();
+
+        window.onload = init;
     </script>
 </body>
 </html>
