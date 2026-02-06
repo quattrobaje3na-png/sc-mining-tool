@@ -28,8 +28,8 @@
 </head>
 <body>
     <div class="header">
-        <div id="data-status" class="status-pill backup">INTEL_LOADING...</div>
-        <h2 style="margin:0;">> MINING_INTEL_v48.4</h2>
+        <div id="data-status" class="status-pill backup">INITIATING...</div>
+        <h2 style="margin:0;">> MINING_INTEL_v48.5</h2>
     </div>
 
     <label>Target_Star_System</label>
@@ -41,51 +41,54 @@
     </select>
 
     <label>Material_Priority_01</label>
-    <select class="ore-sel" id="ore1"></select>
+    <select class="ore-sel"></select>
     <label>Material_Priority_02</label>
-    <select class="ore-sel" id="ore2"></select>
+    <select class="ore-sel"></select>
     <label>Material_Priority_03</label>
-    <select class="ore-sel" id="ore3"></select>
+    <select class="ore-sel"></select>
 
     <button onclick="scan()">Initiate Deep Scan</button>
     <div id="results"></div>
 
     <script>
-        const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
-        
+        // HARDCODED MATERIALS - Menus will NEVER be empty again
+        const MATERIALS = ["Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", "Laranite", "Lindinium", "Quantainium", "Quartz", "Riccite", "Savrilium", "Silicon", "Stileron", "Taranite", "Tin", "Titanium", "Torite", "Tungsten"];
+
         const ROCK_MAP = {
-            "Laranite": { type: "P/Q-Type", sig: "1750/1870" },
-            "Quantainium": { type: "Q-Type", sig: "1870" },
-            "Hephaestanite": { type: "C-Type", sig: "1700" },
-            "Beryl": { type: "S/E-Type", sig: "1720/1900" },
-            "Agricium": { type: "M-Type", sig: "1850" },
-            "Taranite": { type: "M-Type", sig: "1850" },
-            "Titanium": { type: "E-Type", sig: "1900" },
-            "Borase": { type: "C-Type", sig: "1700" },
-            "Tungsten": { type: "P-Type", sig: "1750" },
-            "Copper": { type: "P-Type", sig: "1750" },
-            "Quartz": { type: "C/P/Q-Type", sig: "1700-1870" }
+            "Laranite": { type: "P/Q-Type", sig: "4750/4870" },
+            "Quantainium": { type: "Q-Type", sig: "4870" },
+            "Hephaestanite": { type: "C-Type", sig: "4700" },
+            "Beryl": { type: "S/E-Type", sig: "4720/4900" },
+            "Agricium": { type: "M-Type", sig: "4850" },
+            "Taranite": { type: "M-Type", sig: "4850" },
+            "Titanium": { type: "E-Type", sig: "4900" },
+            "Borase": { type: "C-Type", sig: "4700" },
+            "Tungsten": { type: "P-Type", sig: "4750" },
+            "Copper": { type: "P-Type", sig: "4750" },
+            "Corundum": { type: "S-Type", sig: "4720" },
+            "Ammonia": { type: "I-Type", sig: "4000" },
+            "Quartz": { type: "C/P/Q-Type", sig: "4700/4750/4870" },
+            "Torite": { type: "M-Type", sig: "4850" },
+            "Aluminum": { type: "S/E-Type", sig: "4720/4900" }
         };
 
-        let oreData, sortingData, filterData;
+        let oreData, sortingData;
+        const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
+
+        // Immediately populate dropdowns
+        document.querySelectorAll('.ore-sel').forEach(s => {
+            s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
+                MATERIALS.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
+        });
 
         async function init() {
             const status = document.getElementById('data-status');
             try {
-                // 1. Fetch filter.json and populate menus
-                const fRes = await fetch(BASE_URL + 'filter.json');
-                filterData = await fRes.json();
-                
-                document.querySelectorAll('.ore-sel').forEach(s => {
-                    s.innerHTML = '<option value="">- SELECT MATERIAL -</option>' + 
-                        filterData.materials.sort().map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
-                });
-
-                // 2. Fetch system_sorting.json
+                // Fetch Sorting Groups
                 const sRes = await fetch(BASE_URL + 'system_sorting.json');
-                sortingData = await sRes.json();
+                if(sRes.ok) sortingData = await sRes.json();
 
-                // 3. Fetch ore data (Dual-Path)
+                // Fetch Ore Data (Try Live First)
                 try {
                     const oRes = await fetch(BASE_URL + 'ore_locations_live.json', { cache: "no-store" });
                     if (!oRes.ok) throw new Error();
@@ -100,7 +103,6 @@
                 }
             } catch (err) {
                 status.innerText = "DB: OFFLINE";
-                console.error("Initialization Failed", err);
             }
         }
 
@@ -113,7 +115,7 @@
             if (!oreData) return;
 
             for (let loc in oreData) {
-                // System Group Filtering
+                // Determine System Grouping
                 let locSystem = "Stanton";
                 if (sortingData && sortingData.star_system_groups) {
                     for (let sys in sortingData.star_system_groups) {
@@ -128,11 +130,11 @@
                 let matches = [];
                 picks.forEach(p => {
                     const locOres = oreData[loc].ores || oreData[loc];
-                    // Case-insensitive lookup against JSON keys (e.g. "QUANTANIUM")
+                    // Strict Case-Insensitive Key Matching
                     const matKey = Object.keys(locOres).find(k => k.toUpperCase() === p.toUpperCase());
                     
                     if (matKey && locOres[matKey]) {
-                        const meta = ROCK_MAP[p] || { type: "GENERIC", sig: "SCAN" };
+                        const meta = ROCK_MAP[p] || { type: "GEN-TYPE", sig: "SCAN" };
                         const probValue = locOres[matKey].prob !== undefined ? locOres[matKey].prob : locOres[matKey];
                         
                         matches.push({ 
