@@ -26,8 +26,8 @@
 <body>
     <div class="header">
         <div id="data-status">DATABASE: AUTO_SYNC_ACTIVE</div>
-        <h3>> INTEL_v39.1_UNIFIED_GROUND</h3>
-        <p style="font-size:11px; color:#666;">PLANETARY UNIFIED: 4000/3000 | SPACE: VERIFIED ROCK TYPES</p>
+        <h3>> INTEL_v40.0_DEFINITIVE</h3>
+        <p style="font-size:11px; color:#666;">UNIFIED GROUND (4k/3k) & VERIFIED SPACE SIGNATURES</p>
     </div>
 
     <label>Region_Selection</label>
@@ -38,30 +38,32 @@
     </select>
 
     <label>Priority_Resource_01</label>
-    <select class="ore-sel" id="sel1"></select>
+    <select class="ore-sel"></select>
 
     <label>Priority_Resource_02</label>
-    <select class="ore-sel" id="sel2"></select>
+    <select class="ore-sel"></select>
 
     <label>Priority_Resource_03</label>
-    <select class="ore-sel" id="sel3"></select>
+    <select class="ore-sel"></select>
 
-    <button onclick="scan()">Initiate High-Res Scan</button>
+    <button onclick="scan()">Analyze Signal Signatures</button>
     <div id="results"></div>
 
     <script>
         let oreData, sysGroups, refMapping;
         const BASE_URL = 'https://raw.githubusercontent.com/quattrobaje3na-png/sc-mining-tool/main/';
 
+        // Full list of materials for dropdowns
         const MATERIALS = [
-            "Quantainium", "Bexalite", "Taranite", "Agricium", "Laranite", 
-            "Hephaestanite", "Borase", "Savrilium", "Riccite", "Lindinium", 
-            "Gold", "Beryl", "Tungsten", "Titanium", "Copper", "Quartz", 
-            "Stileron", "Silicon", "Aluminum", "Iron", "Corundum", "Torite", 
-            "Tin", "Ammonia", "Ice"
+            "Agricium", "Aluminum", "Ammonia", "Beryl", "Bexalite", "Borase", 
+            "Copper", "Corundum", "Gold", "Hephaestanite", "Ice", "Iron", 
+            "Laranite", "Lindinium", "Quantainium", "Quartz", "Riccite", 
+            "Savrilium", "Silicon", "Stileron", "Taranite", "Tin", "Titanium", 
+            "Torite", "Tungsten"
         ];
 
-        const MAT_TO_ROCK = {
+        // Map material to rock types for space scanning logic
+        const MAT_MAP = {
             "Quantainium": ["Q"], "Laranite": ["P", "Q"], "Bexalite": ["Q", "M"],
             "Agricium": ["M"], "Taranite": ["M"], "Hephaestanite": ["C"],
             "Borase": ["C"], "Beryl": ["S", "E"], "Gold": ["M", "Q"],
@@ -71,17 +73,15 @@
         };
 
         async function init() {
-            // Populate Dropdowns
-            MATERIALS.sort().forEach(m => {
-                document.querySelectorAll('.ore-sel').forEach(s => {
+            // Auto-populate all 3 dropdowns
+            document.querySelectorAll('.ore-sel').forEach(sel => {
+                sel.innerHTML = '<option value="">- SELECT MATERIAL -</option>';
+                MATERIALS.forEach(m => {
                     let opt = document.createElement('option');
-                    opt.value = m; opt.textContent = m.toUpperCase();
-                    s.appendChild(opt);
+                    opt.value = m;
+                    opt.textContent = m.toUpperCase();
+                    sel.appendChild(opt);
                 });
-            });
-            // Add default first option
-            document.querySelectorAll('.ore-sel').forEach(s => {
-                s.insertAdjacentHTML('afterbegin', '<option value="" selected>- SELECT MATERIAL -</option>');
             });
 
             try {
@@ -91,7 +91,7 @@
                     fetch(BASE_URL + 'reference.json', {cache: "no-store"}).then(r => r.json())
                 ]);
                 [oreData, sysGroups, refMapping] = configs;
-            } catch (err) { console.error("Database Link Failure", err); }
+            } catch (err) { console.error("Database connection failed", err); }
         }
 
         function scan() {
@@ -119,16 +119,16 @@
                 picks.forEach(p => {
                     const oreKey = Object.keys(data.ores).find(k => k.toLowerCase() === p.toLowerCase());
                     if (oreKey) {
-                        const prob = data.ores[oreKey].prob || 0;
-                        locResults.push({ name: oreKey.toUpperCase(), val: (prob * 100).toFixed(1) });
-                        totalProb += prob;
+                        locResults.push({ name: oreKey.toUpperCase(), val: (data.ores[oreKey].prob * 100).toFixed(1) });
+                        totalProb += data.ores[oreKey].prob;
 
+                        // Unified Logic: If planet, use 4k/3k. If space, use specific signatures.
                         if (data.is_planetary) {
                             sigDisplay.add("GROUND (SHIP/VEH): 4000");
                             sigDisplay.add("HAND (FPS): 3000");
-                        } else if (MAT_TO_ROCK[p]) {
-                            MAT_TO_ROCK[p].forEach(type => {
-                                if (data.signatures[type]) {
+                        } else if (MAT_MAP[p]) {
+                            MAT_MAP[p].forEach(type => {
+                                if (data.signatures && data.signatures[type]) {
                                     sigDisplay.add(`${type}-TYPE: ${data.signatures[type].sig}`);
                                 }
                             });
@@ -147,7 +147,7 @@
             }
 
             if (matches.length === 0) {
-                out.innerHTML = "<p style='color:#665500;'>NO VALID SIGNATURES DETECTED</p>";
+                out.innerHTML = "<p style='color:#665500;'>NO DATA MATCHES FOUND</p>";
             } else {
                 matches.sort((a, b) => b.sortVal - a.sortVal).forEach(m => {
                     const card = document.createElement('div');
