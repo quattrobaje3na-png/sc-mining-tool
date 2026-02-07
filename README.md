@@ -45,11 +45,10 @@ Precision Signature Mapping: Never scan a rock blindly. The tool utilizes the la
 
 
 🛠️ INSTALLATION & SETUP
-Clone the Repo: git clone https://github.com/quattrobaje3na-png/sc-mining-tool.git
 
-Verify Data: Ensure probabilities.json, ore_locations.json, and reference.json are in the root folder.
+Open this link: https://quattrobaje3na-png.github.io/sc-mining-tool/
 
-Launch: Open index.html in any browser—optimized for secondary monitors and tablets.
+Launch: Open the site in any browser—optimized for secondary monitors and tablets.
 
 ⚖️ DISCLAIMERS & LEGAL
 This is a fan-made community tool. Star Citizen®, Roberts Space Industries®, and Cloud Imperium® are registered trademarks of Cloud Imperium Rights LLC. All other content on this site is property of its respective owners. This tool is not endorsed by or affiliated with Cloud Imperium or Roberts Space Industries. All game data is subject to change as development progresses.
