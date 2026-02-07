@@ -1,5 +1,5 @@
 CMDR_QUATTRO // MINING MATERIAL FINDER
-The high-fidelity, user-friendly mining intelligence dashboard for Star Citizen 4.0 and beyond.
+The user-friendly mining intelligence dashboard for Star Citizen 4.0 and beyond.
 
 The Mining Material Finder is designed to take the complexity and memorization out of industrial scanning. No more cross-referencing spreadsheets or reaching for search engines while in the cockpit. This tool does the heavy lifting, providing a streamlined HUD for pilots who want to spend less time searching and more time hauling.
 
@@ -24,6 +24,7 @@ I built this tool to be the most accessible mining interface in the community. Y
 
 🚨 DEVELOPMENT ALERT: "ALL SYSTEMS" DATA INTEGRITY
 Using the "ALL SYSTEMS" filter currently introduces junk data and duplicate location IDs. For the most accurate intelligence and correct rock signatures, please select your specific target system (Stanton, Pyro, or Nyx) individually.
+This should be addressed shortly and the tool updated. 
 
 
 🚀 ADVANCED HUD INTELLIGENCE
