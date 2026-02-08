@@ -2,12 +2,12 @@ The Mining Material Finder is a streamlined tool built for Star Citizen 4.6 and 
 
 This is a active work in progress, I am releasing this currently as I felt it could provide some direction for beginners to mining during the event or otherwise. Improvements will continue to be made going into the future.
 
-🕹️ HOW IT WORKS
+🕹️ HOW IT WORKS:
 Choose Stanton, Pyro, or Nyx.
 Select up to 3 materials (Quant, Laranite, etc).
 Instantly view ranked locations with the highest combined percentages.
 
-🚀 HUD INTELLIGENCE
+🚀 HUD INTELLIGENCE:
 Richest locations with greatest total percentage are automatically pinned to the top.
 Toggles between Surface (4000/3000) and 4.0 Orbital (4870, 4900, etc) based on location.
 Identifies Q, P, and M-Type rocks before you even fire a laser.
@@ -16,7 +16,7 @@ Identifies Q, P, and M-Type rocks before you even fire a laser.
 Select a specific system individually for accurate signatures; "ALL SYSTEMS" currently contains junk data. 
 Avoid that section for now.
 
-🔗 INTEL LINKS
+🔗 INTEL LINKS:
 Tool: https://citizenstarterguide.com/mining-calc
 GitHub Webpage: https://quattrobaje3na-png.github.io/sc-mining-tool/
 GitHub For Tool: https://github.com/quattrobaje3na-png/sc-mining-tool
