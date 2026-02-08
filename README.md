@@ -17,7 +17,7 @@ Select a specific system individually for accurate signatures; "ALL SYSTEMS" cur
 Avoid that section for now.
 
 🔗 INTEL LINKS:
-Tool: https://citizenstarterguide.com/mining-calc
+Tool: https://citizen-starter-guide.com/mining-material-finder/
 GitHub Webpage: https://quattrobaje3na-png.github.io/sc-mining-tool/
 GitHub For Tool: https://github.com/quattrobaje3na-png/sc-mining-tool
 YouTube: https://youtube.com/@CMDRQuattro
