@@ -85,7 +85,6 @@
             if (!activeSource) return { type: "GENERIC", sig: "SCAN" };
 
             let bestType = null; let maxP = -1;
-            // Bridge spelling for HUD logic
             const matKey = (material === "Quantainium") ? "Quantanium" : material;
 
             for (let type in activeSource) {
@@ -110,7 +109,10 @@
 
             const mapping = referenceData.location_mapping || {};
             const excluded = filterData.exclude_locations || [];
-            const nyxPrefixes = ["BGR-", "CAJ-", "DLO-", "EMM-", "FSN-", "GRP-", "HJS-", "JWY-", "KKE-", "LHB-", "MNK-", "NBD-", "RSC-", "WDH-", "YKA-"];
+            
+            // Nyx cluster-specific prefixes to block
+            const nyxClusterPrefixes = ["BGR-", "KKE-", "CAJ-", "DLO-", "EMM-"];
+            const nyxPrefixes = [...nyxClusterPrefixes, "FSN-", "GRP-", "HJS-", "JWY-", "LHB-", "MNK-", "NBD-", "RSC-", "WDH-", "YKA-"];
             const pyroKeywords = ["PYR", "RAB-", "RMB-", "BLO-", "STA-", "KIR-", "MON-"];
 
             let resultsArray = [];
@@ -133,14 +135,18 @@
                     }
                 }
 
+                // NYX CLUSTER BLOCKER: Strictly exclude Glaciem Ring/Keeger Belt clusters from Nyx surface view
+                if (selectedSys === "Nyx") {
+                    const isCluster = locUp.includes("RING") || locUp.includes("BELT") || nyxClusterPrefixes.some(p => locUp.startsWith(p));
+                    if (isCluster) continue;
+                }
+
                 if (selectedSys !== "ALL" && selectedSys !== locSystem) continue;
 
                 let matches = [];
                 let totalWeight = 0;
                 picks.forEach(p => {
                     const locOres = oreData[locId].ores || oreData[locId];
-                    
-                    // Normalization bridge for "Quantainium" selection vs "Quantanium" data
                     let possibleKeys = [p];
                     if (p === "Quantainium") possibleKeys.push("Quantanium");
 
