@@ -6,8 +6,8 @@
 </div>
 
 The Mining Material Finder is a streamlined tool built for Star Citizen 4.6 and beyond geared towards beginners and people wanting simplicity. It eliminates spreadsheet hunting so you can mine more effectively and currently clear Alliance Aid: Clearing the Air missions faster.
-
 This is a active work in progress, I am releasing this currently as I felt it could provide some direction for beginners to mining during the event or otherwise. Improvements will continue to be made going into the future.
+The tool is powered by the Reglolith public API.
 
 🕹️ HOW IT WORKS:
 Choose Stanton, Pyro, or Nyx.
