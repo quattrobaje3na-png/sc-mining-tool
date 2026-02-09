@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://i.imgur.com/Kx28qS3.png" alt="SC Mining Material Finder Logo" width="500">
+  <img src="https://i.imgur.com/m6u5zJR.jpeg" alt="SC Mining Material Finder Logo" width="500">
   
   # SC Mining Material Finder
   **The ultimate 4.6 intel tool for the elite miner.**
