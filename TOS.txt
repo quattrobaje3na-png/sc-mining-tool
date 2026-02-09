@@ -1,0 +1,24 @@
+Terms of Service: SC Mining Material Finder
+
+1. Acceptance of Terms
+By adding the SC Mining Material Finder (the "App") to your server or using its commands, you agree to be bound by these Terms of Service. If you do not agree, do not use the App.
+
+2. Description of Service
+The App is a fan-made utility designed to provide mining data and location analytics based on public game data for Star Citizen. We do not guarantee 100% accuracy of data, as game mechanics and values are subject to change by the developers (Cloud Imperium Games).
+
+3. Ownership and Affiliation (Disclaimer)
+- Non-Affiliation: This App is not affiliated with, authorized by, endorsed by, or in any way officially connected with Cloud Imperium Rights LLC, Cloud Imperium Games (CIG), or any of its subsidiaries or affiliates. 
+- Intellectual Property: The official Star Citizen logo, game names, and all related characters, items, and assets are trademarks of Cloud Imperium Rights LLC. 
+- Fan Project: This is a community-driven project created under the Star Citizen Fan Site Policy. All original code and logic for the App remain the property of the App developer.
+
+4. User Conduct
+Users agree not to use the App for:
+- Any illegal activities.
+- Spamming commands to intentionally degrade service performance.
+- Attempting to reverse-engineer the bot to scrape data for commercial use.
+
+5. Limitation of Liability
+The App is provided "as-is" without any warranties. The developers are not responsible for any "in-game losses" (including lost cargo, ship destruction, or lost aUEC) that may occur while using the information provided by the App. Use this data at your own risk.
+
+6. Modifications to Service
+We reserve the right to modify, suspend, or discontinue the App at any time without notice, particularly following game patches that render current data obsolete.
