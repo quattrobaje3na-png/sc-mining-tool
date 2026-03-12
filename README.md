@@ -2,7 +2,9 @@
   <img src="https://i.imgur.com/m6u5zJR.jpeg" alt="SC Mining Material Finder Logo" width="500">
   
   # SC Mining Material Finder
-  **The ultimate 4.6 intel tool for the elite miner.**
+  **The ultimate 4.X intel tool for the elite miner.**
+  **This tool is currently in transition and being upgraded for the 4.7 and beyond build.**
+   **Signatures are accurate for 4.7 but location data may not be 100% accurate**
 </div>
 
 The Mining Material Finder is a streamlined tool built for Star Citizen 4.6 and beyond geared towards beginners and people wanting simplicity. It eliminates spreadsheet hunting so you can mine more effectively and currently clear Alliance Aid: Clearing the Air missions faster.
